@@ -52,7 +52,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
         name: event.name,
-        phone: event.phone,
       );
       if (result.success) {
         emit(AuthRegistrationSuccess('Registration successful! Please use the mobile app.'));

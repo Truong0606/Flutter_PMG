@@ -15,7 +15,6 @@ class _RegisterFormState extends State<RegisterForm>
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -44,7 +43,6 @@ class _RegisterFormState extends State<RegisterForm>
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _animationController.dispose();
@@ -68,9 +66,6 @@ class _RegisterFormState extends State<RegisterForm>
               email: _emailController.text.trim(),
               password: _passwordController.text,
               name: _nameController.text.trim(),
-              phone: _phoneController.text.trim().isEmpty 
-                  ? null 
-                  : _phoneController.text.trim(),
             ),
           );
     }
@@ -135,8 +130,6 @@ class _RegisterFormState extends State<RegisterForm>
                 _buildNameField(),
                 const SizedBox(height: 16),
                 _buildEmailField(),
-                const SizedBox(height: 16),
-                _buildPhoneField(),
                 const SizedBox(height: 16),
                 _buildPasswordField(),
                 const SizedBox(height: 16),
@@ -294,38 +287,6 @@ class _RegisterFormState extends State<RegisterForm>
         }
         if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
           return 'Please enter a valid email';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildPhoneField() {
-    return TextFormField(
-      controller: _phoneController,
-      keyboardType: TextInputType.phone,
-      decoration: InputDecoration(
-        labelText: 'Phone (Optional)',
-        prefixIcon: Icon(
-          Icons.phone_outlined,
-          color: Colors.grey[600],
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFFF6B35), width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.grey[50],
-      ),
-      validator: (value) {
-        if (value != null && value.isNotEmpty) {
-          if (!RegExp(r'^\+?[\d\s\-\(\)]+$').hasMatch(value)) {
-            return 'Please enter a valid phone number';
-          }
         }
         return null;
       },

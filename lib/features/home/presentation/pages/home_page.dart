@@ -61,51 +61,85 @@ class HomePage extends StatelessWidget {
         ),
         actions: [
           // Navigation Menu Items (for mobile, we'll show a menu)
-          PopupMenuButton<String>(
-            icon: const Icon(
-              Icons.menu,
-              color: Color(0xFF2C3E50),
-            ),
-            onSelected: (value) {
-              switch (value) {
-                case 'login':
-                  Navigator.pushNamed(context, '/login');
-                  break;
-                case 'register':
-                  Navigator.pushNamed(context, '/register');
-                  break;
-                default:
-                  // Handle other menu items
-                  break;
-              }
+          BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              return PopupMenuButton<String>(
+                icon: const Icon(
+                  Icons.menu,
+                  color: Color(0xFF2C3E50),
+                ),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'login':
+                      Navigator.pushNamed(context, '/login');
+                      break;
+                    case 'register':
+                      Navigator.pushNamed(context, '/register');
+                      break;
+                    case 'dashboard':
+                      Navigator.pushNamed(context, '/teacher-dashboard');
+                      break;
+                    default:
+                      // Handle other menu items
+                      break;
+                  }
+                },
+                itemBuilder: (context) {
+                  List<PopupMenuEntry<String>> menuItems = [
+                    const PopupMenuItem(
+                      value: 'introduction',
+                      child: Text('INTRODUCTION'),
+                    ),
+                    const PopupMenuItem(
+                      value: 'team',
+                      child: Text('TEAM'),
+                    ),
+                    const PopupMenuItem(
+                      value: 'education',
+                      child: Text('EDUCATION PROGRAM'),
+                    ),
+                    const PopupMenuItem(
+                      value: 'admissions',
+                      child: Text('ADMISSIONS'),
+                    ),
+                  ];
+
+                  // Add teacher-specific menu items
+                  if (state is AuthAuthenticated && state.user.role.toUpperCase() == 'TEACHER') {
+                    menuItems.addAll([
+                      const PopupMenuDivider(),
+                      const PopupMenuItem(
+                        value: 'dashboard',
+                        child: Row(
+                          children: [
+                            Icon(Icons.dashboard, size: 16, color: Color(0xFF3498DB)),
+                            SizedBox(width: 8),
+                            Text('TEACHER DASHBOARD'),
+                          ],
+                        ),
+                      ),
+                    ]);
+                  }
+
+                  // Add auth-related menu items for non-authenticated users
+                  if (state is! AuthAuthenticated) {
+                    menuItems.addAll([
+                      const PopupMenuDivider(),
+                      const PopupMenuItem(
+                        value: 'login',
+                        child: Text('LOGIN'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'register',
+                        child: Text('REGISTER'),
+                      ),
+                    ]);
+                  }
+
+                  return menuItems;
+                },
+              );
             },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'introduction',
-                child: Text('INTRODUCTION'),
-              ),
-              const PopupMenuItem(
-                value: 'team',
-                child: Text('TEAM'),
-              ),
-              const PopupMenuItem(
-                value: 'education',
-                child: Text('EDUCATION PROGRAM'),
-              ),
-              const PopupMenuItem(
-                value: 'admissions',
-                child: Text('ADMISSIONS'),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem(
-                value: 'login',
-                child: Text('LOGIN'),
-              ),
-              const PopupMenuItem(
-                value: 'register',
-                child: Text('REGISTER'),
-              ),
-            ],
           ),
           // Authentication-dependent UI
           BlocBuilder<AuthBloc, AuthState>(

@@ -86,14 +86,12 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String name,
-    String? phone,
   }) async {
     try {
       final response = await _apiClient.post('/auth/register', body: {
         'email': email,
         'password': password,
         'name': name,
-        'phone': phone,
         'role': 'PARENT',
       });
 
@@ -129,7 +127,7 @@ class AuthRepositoryImpl implements AuthRepository {
           email: (data['email'] ?? email).toString(),
           name: (data['name'] ?? name).toString(),
           role: (data['role'] ?? 'PARENT').toString(),
-          phone: data['phone']?.toString() ?? phone,
+          phone: data['phone']?.toString(),
         );
 
         return AuthResult.success(user, '');

@@ -73,8 +73,21 @@ class _LoginFormState extends State<LoginForm>
               backgroundColor: Colors.green,
             ),
           );
-          // Navigate to home page after successful login
-          Navigator.pushReplacementNamed(context, '/');
+          // Navigate based on user role
+          final userRole = state.user.role.toUpperCase();
+          switch (userRole) {
+            case 'PARENT':
+              Navigator.pushReplacementNamed(context, '/');
+              break;
+            case 'HR':
+              Navigator.pushReplacementNamed(context, '/hr-webapp-notice');
+              break;
+            case 'TEACHER':
+              Navigator.pushReplacementNamed(context, '/teacher-dashboard');
+              break;
+            default:
+              Navigator.pushReplacementNamed(context, '/');
+          }
         }
       },
       child: FadeTransition(
