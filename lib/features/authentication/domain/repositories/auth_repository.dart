@@ -11,4 +11,13 @@ abstract class AuthRepository {
   Future<void> logout();
   Future<User?> getCurrentUser();
   Future<bool> isLoggedIn();
+  Future<AuthResult> getProfile();
+  Future<AuthResult> updateProfile({
+    required String name,
+    String? phone,
+    String? address,
+    String? avatarUrl,
+    String? gender,
+    String? identityNumber,
+  });
 }

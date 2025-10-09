@@ -156,4 +156,140 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<bool> isLoggedIn() async {
     return await _storageService.isLoggedIn();
   }
+
+  @override
+  Future<AuthResult> getProfile() async {
+    try {
+      final response = await _apiClient.get('/auth/profile');
+
+      // Handle 204 No Content FIRST - profile is empty/incomplete, create empty user object
+      if (response.statusCode == 204) {
+        final currentUser = await _storageService.getUser();
+        if (currentUser != null) {
+          // Preserve existing cached fields; server just says no content
+          return AuthResult.success(currentUser, '');
+        }
+        return AuthResult.failure('Profile is empty and no user session found. Please login again.');
+      }
+
+      // Handle different response status codes
+      if (response.statusCode == 200) {
+        if (response.body.isEmpty) {
+          return AuthResult.failure(
+            'Server returned empty response',
+            response.statusCode,
+          );
+        }
+
+        Map<String, dynamic> data;
+        try {
+          data = jsonDecode(response.body);
+        } catch (e) {
+          return AuthResult.failure(
+            'Invalid response format from server',
+            response.statusCode,
+          );
+        }
+
+        // Preserve token information if the profile payload doesn't include it
+        final existingUser = await _storageService.getUser();
+        final userFromApi = User.fromJson(data);
+        final user = userFromApi.copyWith(
+          token: userFromApi.token ?? existingUser?.token,
+          tokenExpiry: userFromApi.tokenExpiry ?? existingUser?.tokenExpiry,
+        );
+        await _storageService.saveUser(user);
+        return AuthResult.success(user, '');
+      }
+
+
+
+      // Handle server errors
+      if (response.statusCode >= 500) {
+        return AuthResult.failure(
+          'Server error (${response.statusCode}). Please try again later.',
+          response.statusCode,
+        );
+      }
+
+      // Handle client errors (4xx)
+      String errorMessage = 'Failed to get profile';
+      if (response.body.isNotEmpty) {
+        try {
+          final data = jsonDecode(response.body);
+          errorMessage = data['message'] ?? errorMessage;
+        } catch (e) {
+          // If we can't parse the error, use the default message
+        }
+      }
+
+      return AuthResult.failure(
+        errorMessage,
+        response.statusCode,
+      );
+    } catch (e) {
+      return AuthResult.failure('Network error: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<AuthResult> updateProfile({
+    required String name,
+    String? phone,
+    String? address,
+    String? avatarUrl,
+    String? gender,
+    String? identityNumber,
+  }) async {
+    try {
+      final requestBody = <String, dynamic>{
+        'name': name,
+      };
+      
+      if (phone != null && phone.isNotEmpty) requestBody['phone'] = phone;
+      if (address != null && address.isNotEmpty) requestBody['address'] = address;
+      if (avatarUrl != null && avatarUrl.isNotEmpty) requestBody['avatarUrl'] = avatarUrl;
+      if (gender != null && gender.isNotEmpty) requestBody['gender'] = gender;
+      if (identityNumber != null && identityNumber.isNotEmpty) requestBody['identityNumber'] = identityNumber;
+
+      final response = await _apiClient.put('/auth/profile', body: requestBody);
+
+      if (response.body.isEmpty) {
+        return AuthResult.failure(
+          'Server returned empty response. Status: ${response.statusCode}',
+          response.statusCode,
+        );
+      }
+
+      if (response.statusCode >= 500) {
+        return AuthResult.failure(
+          'Server error (${response.statusCode}). Please try again later.',
+          response.statusCode,
+        );
+      }
+
+      Map<String, dynamic> data;
+      try {
+        data = jsonDecode(response.body);
+      } catch (e) {
+        return AuthResult.failure(
+          'Invalid response format from server.',
+          response.statusCode,
+        );
+      }
+
+      if (response.statusCode == 200) {
+        final user = User.fromJson(data);
+        await _storageService.saveUser(user);
+        return AuthResult.success(user, 'Profile updated successfully');
+      }
+
+      return AuthResult.failure(
+        data['message'] ?? 'Failed to update profile',
+        response.statusCode,
+      );
+    } catch (e) {
+      return AuthResult.failure(e.toString());
+    }
+  }
 }

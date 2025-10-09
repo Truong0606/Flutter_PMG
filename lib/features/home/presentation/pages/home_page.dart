@@ -184,15 +184,15 @@ class HomePage extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Hero Section with blue gradient background
-            const HeroSection(),
-            // Introduction/About Us tabs section
-            const IntroTabsSection(),
-          ],
+          child: Column(
+            children: [
+              // Hero Section with blue gradient background
+              const HeroSection(),
+              // Introduction/About Us tabs section
+              const IntroTabsSection(),
+            ],
+          ),
         ),
-      ),
     );
   }
 }

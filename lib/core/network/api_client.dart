@@ -13,6 +13,7 @@ class ApiClient {
   Future<Map<String, String>> _getHeaders() async {
     final headers = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     };
     
     final token = await _storageService.getToken();

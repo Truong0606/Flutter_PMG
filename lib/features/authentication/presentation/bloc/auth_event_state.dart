@@ -40,6 +40,29 @@ class LogoutRequested extends AuthEvent {}
 
 class CheckAuthStatus extends AuthEvent {}
 
+class GetProfileRequested extends AuthEvent {}
+
+class UpdateProfileRequested extends AuthEvent {
+  final String name;
+  final String? phone;
+  final String? address;
+  final String? avatarUrl;
+  final String? gender;
+  final String? identityNumber;
+
+  const UpdateProfileRequested({
+    required this.name,
+    this.phone,
+    this.address,
+    this.avatarUrl,
+    this.gender,
+    this.identityNumber,
+  });
+
+  @override
+  List<Object> get props => [name, if (phone != null) phone!, if (address != null) address!, if (avatarUrl != null) avatarUrl!, if (gender != null) gender!, if (identityNumber != null) identityNumber!];
+}
+
 abstract class AuthState extends Equatable {
   const AuthState();
 
@@ -78,4 +101,14 @@ class AuthRegistrationSuccess extends AuthState {
 
   @override
   List<Object> get props => [message];
+}
+
+class ProfileUpdateSuccess extends AuthState {
+  final String message;
+  final User user;
+
+  const ProfileUpdateSuccess(this.message, this.user);
+
+  @override
+  List<Object> get props => [message, user];
 }
