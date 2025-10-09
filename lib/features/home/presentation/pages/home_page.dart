@@ -79,6 +79,9 @@ class HomePage extends StatelessWidget {
                     case 'dashboard':
                       Navigator.pushNamed(context, '/teacher-dashboard');
                       break;
+                    case 'parent-dashboard':
+                      Navigator.pushNamed(context, '/parent-dashboard');
+                      break;
                     default:
                       // Handle other menu items
                       break;
@@ -115,6 +118,23 @@ class HomePage extends StatelessWidget {
                             Icon(Icons.dashboard, size: 16, color: Color(0xFF3498DB)),
                             SizedBox(width: 8),
                             Text('TEACHER DASHBOARD'),
+                          ],
+                        ),
+                      ),
+                    ]);
+                  }
+
+                  // Add parent-specific menu item
+                  if (state is AuthAuthenticated && state.user.role.toUpperCase() == 'PARENT') {
+                    menuItems.addAll([
+                      const PopupMenuDivider(),
+                      const PopupMenuItem(
+                        value: 'parent-dashboard',
+                        child: Row(
+                          children: [
+                            Icon(Icons.dashboard_customize_outlined, size: 16, color: Color(0xFFFF6B35)),
+                            SizedBox(width: 8),
+                            Text('PARENT DASHBOARD'),
                           ],
                         ),
                       ),
