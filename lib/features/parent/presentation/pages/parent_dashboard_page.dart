@@ -83,7 +83,18 @@ class ParentDashboardPage extends StatelessWidget {
             _BottomSheetItem(
               icon: Icons.badge_outlined,
               label: 'Child Profile',
-              onTap: () => _comingSoon(context, 'Child Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/student/list');
+              },
+            ),
+            _BottomSheetItem(
+              icon: Icons.assignment_add,
+              label: 'Admission Form',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/admission/form');
+              },
             ),
             _BottomSheetItem(
               icon: Icons.event_available_outlined,

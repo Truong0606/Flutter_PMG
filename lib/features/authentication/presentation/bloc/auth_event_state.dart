@@ -25,15 +25,19 @@ class RegisterRequested extends AuthEvent {
   final String email;
   final String password;
   final String name;
+  final String? job;
+  final String? relationshipToChild;
 
   const RegisterRequested({
     required this.email,
     required this.password,
     required this.name,
+    this.job,
+    this.relationshipToChild,
   });
 
   @override
-  List<Object> get props => [email, password, name];
+  List<Object> get props => [email, password, name, if (job != null) job!, if (relationshipToChild != null) relationshipToChild!];
 }
 
 class LogoutRequested extends AuthEvent {}

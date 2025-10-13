@@ -14,6 +14,15 @@ import 'features/authentication/presentation/bloc/auth_event_state.dart';
 import 'features/authentication/data/repositories/auth_repository_impl.dart';
 import 'core/network/api_client.dart';
 import 'core/services/storage_service.dart';
+import 'features/student/data/repositories/student_repository_impl.dart';
+import 'features/student/presentation/bloc/student_bloc.dart';
+import 'features/student/presentation/pages/student_list_page.dart';
+import 'features/student/presentation/pages/student_create_page.dart';
+import 'features/student/presentation/pages/student_detail_page.dart';
+import 'features/admission/data/repositories/admission_repository_impl.dart';
+import 'features/admission/presentation/bloc/admission_bloc.dart';
+import 'features/admission/presentation/pages/admission_form_page.dart';
+import 'features/student/domain/entities/student.dart' as student_domain;
 
 void main() {
   runApp(const MyApp());
@@ -28,11 +37,19 @@ class MyApp extends StatelessWidget {
     final storageService = StorageService();
     final apiClient = ApiClient(storageService);
     final authRepository = AuthRepositoryImpl(apiClient, storageService);
+    final studentRepository = StudentRepositoryImpl(apiClient);
+  final admissionRepository = AdmissionRepositoryImpl(apiClient);
 
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (context) => AuthBloc(authRepository)..add(CheckAuthStatus()),
+        ),
+        BlocProvider(
+          create: (context) => StudentBloc(studentRepository),
+        ),
+        BlocProvider(
+          create: (context) => AdmissionBloc(admissionRepository),
         ),
       ],
       child: MaterialApp(
@@ -54,8 +71,22 @@ class MyApp extends StatelessWidget {
           '/hr-webapp-notice': (context) => const HRWebappNoticePage(),
           '/teacher-dashboard': (context) => const TeacherDashboardPage(),
           '/parent-dashboard': (context) => const ParentDashboardPage(),
+          '/student/list': (context) => const StudentListPage(),
+          '/student/create': (context) => const StudentCreatePage(),
+          '/student/detail': (context) => const StudentDetailPage(),
           '/hr/dashboard': (context) => const HomePage(), // Placeholder
           '/education/dashboard': (context) => const HomePage(), // Placeholder
+        },
+        onGenerateRoute: (settings) {
+          if (settings.name == '/admission/form') {
+            final args = settings.arguments;
+            if (args is student_domain.Student) {
+              return MaterialPageRoute(builder: (_) => AdmissionFormPage(initialStudent: args));
+            }
+            // Allow opening without args (choose child inside the page)
+            return MaterialPageRoute(builder: (_) => const AdmissionFormPage());
+          }
+          return null;
         },
       ),
     );

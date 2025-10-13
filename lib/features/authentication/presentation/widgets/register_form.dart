@@ -17,6 +17,8 @@ class _RegisterFormState extends State<RegisterForm>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _jobController = TextEditingController();
+  String? _relationshipToChild;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   late AnimationController _animationController;
@@ -45,6 +47,7 @@ class _RegisterFormState extends State<RegisterForm>
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+  _jobController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -66,6 +69,8 @@ class _RegisterFormState extends State<RegisterForm>
               email: _emailController.text.trim(),
               password: _passwordController.text,
               name: _nameController.text.trim(),
+              job: _jobController.text.trim(),
+              relationshipToChild: _relationshipToChild,
             ),
           );
     }
@@ -76,12 +81,18 @@ class _RegisterFormState extends State<RegisterForm>
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
+          final msg = state.message;
+          final hide = msg.contains('Server returned empty response') ||
+              msg.contains('Invalid response format') ||
+              msg.contains('Network error:');
+          if (!hide) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(msg),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         } else if (state is AuthRegistrationSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -134,6 +145,10 @@ class _RegisterFormState extends State<RegisterForm>
                 _buildPasswordField(),
                 const SizedBox(height: 16),
                 _buildConfirmPasswordField(),
+                const SizedBox(height: 16),
+                _buildJobField(),
+                const SizedBox(height: 16),
+                _buildRelationshipField(),
                 const SizedBox(height: 24),
                 
                 // Register Button
@@ -372,6 +387,69 @@ class _RegisterFormState extends State<RegisterForm>
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please confirm your password';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildJobField() {
+    return TextFormField(
+      controller: _jobController,
+      textCapitalization: TextCapitalization.words,
+      decoration: InputDecoration(
+        labelText: 'Job',
+        prefixIcon: Icon(
+          Icons.work_outline,
+          color: Colors.grey[600],
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFFF6B35), width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey[50],
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Please enter your job';
+        }
+        if (value.trim().length < 2) {
+          return 'Job must be at least 2 characters';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildRelationshipField() {
+    return DropdownButtonFormField<String>(
+      initialValue: _relationshipToChild,
+      decoration: InputDecoration(
+        labelText: 'Relationship to Child',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFFF6B35), width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey[50],
+      ),
+      items: const [
+        DropdownMenuItem(value: 'Mẹ', child: Text('Mother')),
+        DropdownMenuItem(value: 'Cha', child: Text('Father')), 
+      ],
+      onChanged: (val) => setState(() => _relationshipToChild = val),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please select your relationship to child';
         }
         return null;
       },

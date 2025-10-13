@@ -55,9 +55,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             // ignore: avoid_print
             print('Navigated to /reset-password with email and token');
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            final msg = state.message;
+            final hide = msg.contains('Server returned empty response') ||
+                msg.contains('Invalid response format') ||
+                msg.contains('Network error:');
+            if (!hide) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(msg)),
+              );
+            }
           }
         },
         builder: (context, state) {

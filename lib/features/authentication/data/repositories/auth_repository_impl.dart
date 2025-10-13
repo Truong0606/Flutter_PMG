@@ -86,13 +86,17 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String name,
+    String? job,
+    String? relationshipToChild,
   }) async {
     try {
-      final response = await _apiClient.post('/auth/register', body: {
+      final response = await _apiClient.post('/auth/register-parent', body: {
         'email': email,
         'password': password,
         'name': name,
-        'role': 'PARENT',
+        // Optional new fields
+        if (job != null && job.isNotEmpty) 'job': job,
+        if (relationshipToChild != null && relationshipToChild.isNotEmpty) 'relationshipToChild': relationshipToChild,
       });
 
       // Check if response body is empty or invalid
@@ -175,8 +179,13 @@ class AuthRepositoryImpl implements AuthRepository {
       // Handle different response status codes
       if (response.statusCode == 200) {
         if (response.body.isEmpty) {
+          // Treat empty 200 as a soft success using cached user if available
+          final existingUser = await _storageService.getUser();
+          if (existingUser != null) {
+            return AuthResult(success: true, message: '', user: existingUser, token: null);
+          }
           return AuthResult.failure(
-            'Server returned empty response',
+            'Unable to load your profile right now. Please try again later.',
             response.statusCode,
           );
         }
@@ -253,6 +262,25 @@ class AuthRepositoryImpl implements AuthRepository {
       if (identityNumber != null && identityNumber.isNotEmpty) requestBody['identityNumber'] = identityNumber;
 
       final response = await _apiClient.put('/auth/profile', body: requestBody);
+
+      if (response.statusCode == 204 || (response.statusCode == 200 && response.body.isEmpty)) {
+        // Some backends return 204 No Content for successful updates
+        final existingUser = await _storageService.getUser();
+        if (existingUser != null) {
+          final updatedUser = existingUser.copyWith(
+            name: name,
+            phone: phone ?? existingUser.phone,
+            address: address ?? existingUser.address,
+            avatarUrl: avatarUrl ?? existingUser.avatarUrl,
+            gender: gender ?? existingUser.gender,
+            identityNumber: identityNumber ?? existingUser.identityNumber,
+          );
+          await _storageService.saveUser(updatedUser);
+          return AuthResult(success: true, message: 'Profile updated successfully', user: updatedUser, token: null);
+        }
+        // No existing user to update, but treat as success without exposing details
+        return AuthResult(success: true, message: 'Profile updated successfully', user: null, token: null);
+      }
 
       if (response.body.isEmpty) {
         return AuthResult.failure(

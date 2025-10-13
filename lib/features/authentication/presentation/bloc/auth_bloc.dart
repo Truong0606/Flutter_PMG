@@ -83,6 +83,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: event.email,
         password: event.password,
         name: event.name,
+        job: event.job,
+        relationshipToChild: event.relationshipToChild,
       );
       if (result.success) {
         emit(AuthRegistrationSuccess('Registration successful! Please use the mobile app.'));

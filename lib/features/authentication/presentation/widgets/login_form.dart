@@ -16,6 +16,7 @@ class _LoginFormState extends State<LoginForm>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  String? _serverError; // inline error from backend/login failures
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -45,6 +46,7 @@ class _LoginFormState extends State<LoginForm>
   }
 
   void _handleLogin() {
+    setState(() => _serverError = null);
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
             LoginRequested(
@@ -60,13 +62,16 @@ class _LoginFormState extends State<LoginForm>
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
+          final msg = state.message;
+          final hide = msg.contains('Server returned empty response') ||
+              msg.contains('Invalid response format') ||
+              msg.contains('Network error:');
+          final displayMsg = hide ? 'Something went wrong. Please try again later.' : msg;
+          setState(() => _serverError = displayMsg);
         } else if (state is AuthAuthenticated) {
+          if (_serverError != null) {
+            setState(() => _serverError = null);
+          }
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Login successful!'),
@@ -128,6 +133,8 @@ class _LoginFormState extends State<LoginForm>
                 const SizedBox(height: 16),
                 _buildPasswordField(),
                 const SizedBox(height: 24),
+                if (_serverError != null) _buildInlineErrorBanner(_serverError!),
+                if (_serverError != null) const SizedBox(height: 8),
                 
                 // Login Button
                 _buildLoginButton(),
@@ -298,6 +305,7 @@ class _LoginFormState extends State<LoginForm>
         ),
         filled: true,
         fillColor: Colors.grey[50],
+        errorText: _serverError,
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -305,6 +313,31 @@ class _LoginFormState extends State<LoginForm>
         }
         return null;
       },
+    );
+  }
+
+  Widget _buildInlineErrorBanner(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFEAEA),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFFFC1C1)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, color: Color(0xFFD63031)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: Color(0xFFD63031)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
