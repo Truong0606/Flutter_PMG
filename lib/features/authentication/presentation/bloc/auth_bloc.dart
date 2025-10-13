@@ -13,6 +13,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<GetProfileRequested>(_onGetProfileRequested);
     
     on<UpdateProfileRequested>(_onUpdateProfileRequested);
+
+    on<ForgotPasswordRequested>(_onForgotPasswordRequested);
+    on<ResetPasswordRequested>(_onResetPasswordRequested);
   }
 
   void _onCheckAuthStatus(CheckAuthStatus event, Emitter<AuthState> emit) async {
@@ -150,6 +153,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthAuthenticated(result.user!));
       } else {
         emit(AuthError(result.error ?? 'Failed to update profile'));
+      }
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  void _onForgotPasswordRequested(ForgotPasswordRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      final result = await _authRepository.forgotPassword(email: event.email);
+      if (result.success) {
+        emit(ForgotPasswordSuccess(result.message ?? 'Reset token sent to your email', resetToken: result.token));
+      } else {
+        emit(AuthError(result.error ?? 'Failed to request password reset'));
+      }
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  void _onResetPasswordRequested(ResetPasswordRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      final result = await _authRepository.resetPassword(email: event.email, resetToken: event.resetToken, newPassword: event.newPassword);
+      if (result.success) {
+        emit(ResetPasswordSuccess(result.message ?? 'Password reset successful'));
+      } else {
+        emit(AuthError(result.error ?? 'Failed to reset password'));
       }
     } catch (e) {
       emit(AuthError(e.toString()));

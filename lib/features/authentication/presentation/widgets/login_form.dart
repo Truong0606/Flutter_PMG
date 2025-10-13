@@ -350,12 +350,7 @@ class _LoginFormState extends State<LoginForm>
   Widget _buildForgotPasswordLink() {
     return TextButton(
       onPressed: () {
-        // TODO: Implement forgot password functionality
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Forgot password feature coming soon!'),
-          ),
-        );
+        Navigator.pushNamed(context, '/forgot-password');
       },
       child: const Text(
         'Forgot Password?',

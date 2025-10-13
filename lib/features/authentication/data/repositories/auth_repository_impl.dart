@@ -292,4 +292,63 @@ class AuthRepositoryImpl implements AuthRepository {
       return AuthResult.failure(e.toString());
     }
   }
+
+  // New: Forgot Password - request reset token via email
+  @override
+  Future<AuthResult> forgotPassword({required String email}) async {
+    try {
+      final response = await _apiClient.post('/auth/pass/forgot', body: {
+        'email': email,
+      });
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (response.body.isEmpty) {
+          // Consider success even if body empty; backend might not return details
+          return AuthResult(success: true, message: 'If this email exists, a reset token was sent.', user: null, token: null);
+        }
+        try {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          final msg = data['message']?.toString() ?? 'Reset token sent.';
+          final token = data['resetToken']?.toString();
+          return AuthResult(success: true, message: msg, user: null, token: token);
+        } catch (_) {
+          return AuthResult(success: true, message: 'Reset token sent.', user: null, token: null);
+        }
+      }
+
+      String message = 'Failed to request password reset';
+      if (response.body.isNotEmpty) {
+        try { message = (jsonDecode(response.body) as Map<String, dynamic>)['message']?.toString() ?? message; } catch (_) {}
+      }
+      return AuthResult.failure(message, response.statusCode);
+    } catch (e) {
+      return AuthResult.failure('Network error: ${e.toString()}');
+    }
+  }
+
+  // New: Reset Password using provided resetToken
+  @override
+  Future<AuthResult> resetPassword({required String email, required String resetToken, required String newPassword}) async {
+    try {
+      final response = await _apiClient.post('/auth/pass/reset', body: {
+        'email': email,
+        'token': resetToken,
+        'newPassword': newPassword,
+      });
+
+      if (response.statusCode == 200) {
+        final data = response.body.isNotEmpty ? jsonDecode(response.body) as Map<String, dynamic> : {};
+        final msg = data['message']?.toString() ?? 'Password reset successful';
+        return AuthResult(success: true, message: msg, user: null, token: null);
+      }
+
+      String message = 'Failed to reset password';
+      if (response.body.isNotEmpty) {
+        try { message = (jsonDecode(response.body) as Map<String, dynamic>)['message']?.toString() ?? message; } catch (_) {}
+      }
+      return AuthResult.failure(message, response.statusCode);
+    } catch (e) {
+      return AuthResult.failure('Network error: ${e.toString()}');
+    }
+  }
 }

@@ -400,10 +400,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     
     if (names.length == 1) {
-      return names[0].length > 0 ? names[0].substring(0, 1).toUpperCase() : 'U';
+      return names[0].isNotEmpty ? names[0].substring(0, 1).toUpperCase() : 'U';
     } else {
-      String firstInitial = names[0].length > 0 ? names[0].substring(0, 1) : '';
-      String lastInitial = names[names.length - 1].length > 0 ? names[names.length - 1].substring(0, 1) : '';
+      String firstInitial = names[0].isNotEmpty ? names[0].substring(0, 1) : '';
+      String lastInitial = names[names.length - 1].isNotEmpty ? names[names.length - 1].substring(0, 1) : '';
       return (firstInitial + lastInitial).toUpperCase();
     }
   }
@@ -448,23 +448,24 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: avatarController,
-                            decoration: const InputDecoration(
-                              labelText: 'Avatar URL (Optional)',
-                              border: OutlineInputBorder(),
-                              hintText: 'https://example.com/avatar.jpg',
-                            ),
-                            keyboardType: TextInputType.url,
+                        Text(
+                          'Avatar (Optional)',
+                          style: TextStyle(
+                            color: Colors.grey[700],
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        _UploadAvatarButton(onUploaded: (url) {
-                          avatarController.text = url;
-                        }),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: _UploadAvatarButton(onUploaded: (url) {
+                            // Keep the uploaded URL internally without showing a text field
+                            avatarController.text = url;
+                          }),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -487,7 +488,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: selectedGender,
+                      initialValue: selectedGender,
                       decoration: const InputDecoration(
                         labelText: 'Gender (Optional)',
                         border: OutlineInputBorder(),

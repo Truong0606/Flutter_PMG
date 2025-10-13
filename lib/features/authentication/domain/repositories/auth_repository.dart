@@ -20,4 +20,8 @@ abstract class AuthRepository {
     String? gender,
     String? identityNumber,
   });
+
+  // Password reset
+  Future<AuthResult> forgotPassword({required String email});
+  Future<AuthResult> resetPassword({required String email, required String resetToken, required String newPassword});
 }

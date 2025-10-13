@@ -181,10 +181,10 @@ class UserAccountDropdown extends StatelessWidget {
     }
     
     if (names.length == 1) {
-      return names[0].length > 0 ? names[0].substring(0, 1).toUpperCase() : 'U';
+      return names[0].isNotEmpty ? names[0].substring(0, 1).toUpperCase() : 'U';
     } else {
-      String firstInitial = names[0].length > 0 ? names[0].substring(0, 1) : '';
-      String lastInitial = names[names.length - 1].length > 0 ? names[names.length - 1].substring(0, 1) : '';
+      String firstInitial = names[0].isNotEmpty ? names[0].substring(0, 1) : '';
+      String lastInitial = names[names.length - 1].isNotEmpty ? names[names.length - 1].substring(0, 1) : '';
       return (firstInitial + lastInitial).toUpperCase();
     }
   }

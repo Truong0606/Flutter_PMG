@@ -39,6 +39,8 @@ dependencies:
   http: ^1.2.0
   # Pick images from gallery/camera
   image_picker: ^1.1.2
+  # Required by CloudinaryService for multipart content types
+  http_parser: ^4.0.2
   
   # Local storage
   shared_preferences: ^2.2.2

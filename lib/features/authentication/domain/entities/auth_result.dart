@@ -6,6 +6,7 @@ class AuthResult {
   final User? user;
   final String? token;
   final int? status;
+  final String? message;
 
   const AuthResult({
     required this.success,
@@ -13,13 +14,15 @@ class AuthResult {
     this.user,
     this.token,
     this.status,
+    this.message,
   });
 
-  factory AuthResult.success(User user, String token) {
+  factory AuthResult.success(User user, String token, {String? message}) {
     return AuthResult(
       success: true,
       user: user,
       token: token,
+      message: message,
     );
   }
 

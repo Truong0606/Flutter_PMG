@@ -112,3 +112,35 @@ class ProfileUpdateSuccess extends AuthState {
   @override
   List<Object> get props => [message, user];
 }
+
+// Forgot/Reset Password
+class ForgotPasswordRequested extends AuthEvent {
+  final String email;
+  const ForgotPasswordRequested(this.email);
+  @override
+  List<Object> get props => [email];
+}
+
+class ResetPasswordRequested extends AuthEvent {
+  final String email;
+  final String resetToken;
+  final String newPassword;
+  const ResetPasswordRequested({required this.email, required this.resetToken, required this.newPassword});
+  @override
+  List<Object> get props => [email, resetToken, newPassword];
+}
+
+class ForgotPasswordSuccess extends AuthState {
+  final String message;
+  final String? resetToken; // for testing/dev environments
+  const ForgotPasswordSuccess(this.message, {this.resetToken});
+  @override
+  List<Object?> get props => [message, resetToken];
+}
+
+class ResetPasswordSuccess extends AuthState {
+  final String message;
+  const ResetPasswordSuccess(this.message);
+  @override
+  List<Object> get props => [message];
+}
