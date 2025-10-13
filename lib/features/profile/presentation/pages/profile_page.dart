@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import '../../../../core/services/cloudinary_service.dart';
+import '../../../../core/config/app_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../authentication/presentation/bloc/auth_bloc.dart';
 import '../../../authentication/presentation/bloc/auth_event_state.dart';
@@ -444,14 +448,24 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: avatarController,
-                      decoration: const InputDecoration(
-                        labelText: 'Avatar URL (Optional)',
-                        border: OutlineInputBorder(),
-                        hintText: 'https://example.com/avatar.jpg',
-                      ),
-                      keyboardType: TextInputType.url,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: avatarController,
+                            decoration: const InputDecoration(
+                              labelText: 'Avatar URL (Optional)',
+                              border: OutlineInputBorder(),
+                              hintText: 'https://example.com/avatar.jpg',
+                            ),
+                            keyboardType: TextInputType.url,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _UploadAvatarButton(onUploaded: (url) {
+                          avatarController.text = url;
+                        }),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     TextField(
@@ -566,5 +580,75 @@ class _ProfilePageState extends State<ProfilePage> {
     
     // Wait a bit for the auth check to complete
     await Future.delayed(const Duration(milliseconds: 1000));
+  }
+}
+
+class _UploadAvatarButton extends StatefulWidget {
+  final ValueChanged<String> onUploaded;
+  const _UploadAvatarButton({required this.onUploaded});
+
+  @override
+  State<_UploadAvatarButton> createState() => _UploadAvatarButtonState();
+}
+
+class _UploadAvatarButtonState extends State<_UploadAvatarButton> {
+  bool _uploading = false;
+
+  Future<void> _pickAndUpload() async {
+    if (AppConfig.cloudinaryCloudName.isEmpty || AppConfig.cloudinaryUploadPreset.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET.')),
+      );
+      return;
+    }
+
+    final picker = ImagePicker();
+    final XFile? picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (picked == null) return;
+
+    setState(() => _uploading = true);
+    try {
+      final service = CloudinaryService(
+        cloudName: AppConfig.cloudinaryCloudName,
+        uploadPreset: AppConfig.cloudinaryUploadPreset,
+      );
+      final url = await service.uploadImage(File(picked.path));
+      widget.onUploaded(url);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Avatar uploaded successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 48,
+      child: ElevatedButton.icon(
+        onPressed: _uploading ? null : _pickAndUpload,
+        icon: _uploading
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              )
+            : const Icon(Icons.cloud_upload_outlined, size: 18, color: Colors.white),
+        label: Text(_uploading ? 'Uploading...' : 'Upload', style: const TextStyle(color: Colors.white)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFFF6B35),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+        ),
+      ),
+    );
   }
 }

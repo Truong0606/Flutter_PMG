@@ -31,4 +31,14 @@ class AppConfig {
 
   static bool get isProduction => environment == 'production';
   static bool get isDevelopment => environment == 'development';
+
+  // Cloudinary configuration (set via --dart-define)
+  static const String cloudinaryCloudName = String.fromEnvironment(
+    'CLOUDINARY_CLOUD_NAME',
+    defaultValue: 'duy1h4uru',
+  );
+  static const String cloudinaryUploadPreset = String.fromEnvironment(
+    'CLOUDINARY_UPLOAD_PRESET',
+    defaultValue: 'pes_mobile_unsigned',
+  );
 }

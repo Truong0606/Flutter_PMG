@@ -37,6 +37,8 @@ dependencies:
   
   # HTTP requests
   http: ^1.2.0
+  # Pick images from gallery/camera
+  image_picker: ^1.1.2
   
   # Local storage
   shared_preferences: ^2.2.2

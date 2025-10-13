@@ -37,14 +37,19 @@ class UserAccountDropdown extends StatelessWidget {
             CircleAvatar(
               radius: 16,
               backgroundColor: const Color(0xFFFF6B35),
-              child: Text(
-                _getInitials(user.name),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              backgroundImage: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+                  ? NetworkImage(user.avatarUrl!)
+                  : null,
+              child: (user.avatarUrl == null || user.avatarUrl!.isEmpty)
+                  ? Text(
+                      _getInitials(user.name),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
             ),
             const SizedBox(width: 4),
             // Dropdown Arrow
@@ -67,14 +72,19 @@ class UserAccountDropdown extends StatelessWidget {
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: const Color(0xFFFF6B35),
-                  child: Text(
-                    _getInitials(user.name),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  backgroundImage: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+                      ? NetworkImage(user.avatarUrl!)
+                      : null,
+                  child: (user.avatarUrl == null || user.avatarUrl!.isEmpty)
+                      ? Text(
+                          _getInitials(user.name),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
