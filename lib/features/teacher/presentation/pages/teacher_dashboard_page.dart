@@ -227,7 +227,7 @@ class TeacherDashboardPage extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 1.1,
+              childAspectRatio: 1.0,
               children: [
                 _buildDashboardCard(
                   icon: Icons.people_outline,
@@ -235,9 +235,16 @@ class TeacherDashboardPage extends StatelessWidget {
                   subtitle: 'View and manage your classes',
                   color: const Color(0xFF27AE60),
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Classes feature coming soon!')),
-                    );
+                    Navigator.pushNamed(context, '/teacher-classes');
+                  },
+                ),
+                _buildDashboardCard(
+                  icon: Icons.schedule_outlined,
+                  title: 'My Schedules',
+                  subtitle: 'View your teaching schedules',
+                  color: const Color(0xFF9B59B6),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/teacher-schedules');
                   },
                 ),
                 _buildDashboardCard(
