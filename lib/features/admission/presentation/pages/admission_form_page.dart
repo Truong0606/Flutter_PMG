@@ -13,9 +13,30 @@ class AdmissionFormPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Admission Form')),
       body: BlocConsumer<AdmissionBloc, AdmissionState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is AdmissionError) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is AdmissionSubmitSuccess) {
+            await showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Admission Submitted'),
+                content: const Text('Your admission form has been submitted. Please finish your payment.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Close'),
+                  ),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      Navigator.pushReplacementNamed(context, '/admission/forms');
+                    },
+                    child: const Text('View All Forms'),
+                  ),
+                ],
+              ),
+            );
           }
         },
         builder: (context, state) {
@@ -209,6 +230,11 @@ class _FormContentState extends State<_FormContent> {
             Text('Last check result:', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 4),
             _ResultBox(json: latest),
+            const SizedBox(height: 12),
+            _ProceedToFormButton(
+              term: term,
+              selectedStudentId: _studentId,
+            ),
           ],
           const SizedBox(height: 8),
           SizedBox(
@@ -332,6 +358,140 @@ class _ResultBox extends StatelessWidget {
                   ],
                 )
               : Text(message ?? json.toString()),
+    );
+  }
+}
+
+class _ProceedToFormButton extends StatelessWidget {
+  final AdmissionTerm term;
+  final int selectedStudentId;
+  const _ProceedToFormButton({required this.term, required this.selectedStudentId});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 44,
+      child: ElevatedButton.icon(
+        icon: const Icon(Icons.arrow_forward),
+        label: const Text('Continue to Admission Form'),
+        onPressed: selectedStudentId == 0
+            ? null
+            : () {
+                final bloc = context.read<AdmissionBloc>();
+                final st = bloc.state;
+                if (st is! AdmissionLoaded) return;
+                // Prefill selectedForForm with currently checked classes from bloc
+                final pre = st.checkedClassIds;
+                bloc.add(SetSelectedForForm(pre));
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (ctx) => _SelectClassesSheet(term: term),
+                );
+              },
+      ),
+    );
+  }
+}
+
+class _SelectClassesSheet extends StatelessWidget {
+  final AdmissionTerm term;
+  const _SelectClassesSheet({required this.term});
+
+  @override
+  Widget build(BuildContext context) {
+    String _fmtDateLocal(String s) {
+      if (s.isEmpty) return s;
+      try {
+        final d = DateTime.parse(s);
+        final dd = d.day.toString().padLeft(2, '0');
+        final mm = d.month.toString().padLeft(2, '0');
+        return '$dd/$mm/${d.year}';
+      } catch (_) {
+        final core = s.length >= 10 ? s.substring(0, 10) : s;
+        final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(core);
+        if (match != null) {
+          final y = match.group(1)!;
+          final m = match.group(2)!;
+          final d = match.group(3)!;
+          return '$d/$m/$y';
+        }
+        return core;
+      }
+    }
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.5,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (ctx, controller) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.class_rounded),
+                  const SizedBox(width: 8),
+                  Text('Select classes to include', style: Theme.of(context).textTheme.titleMedium),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: BlocBuilder<AdmissionBloc, AdmissionState>(
+                  builder: (context, state) {
+                    if (state is! AdmissionLoaded) return const SizedBox.shrink();
+                    final selected = state.selectedForForm.toSet();
+                    return ListView.separated(
+                      controller: controller,
+                      itemCount: term.classes.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (_, i) {
+                        final c = term.classes[i];
+                        final checked = selected.contains(c.id);
+                        return CheckboxListTile(
+                          value: checked,
+                          onChanged: (_) => context.read<AdmissionBloc>().add(ToggleSelectedForForm(c.id)),
+                          title: Text(c.name),
+                          subtitle: Text('${c.academicYear} • ${c.numberOfWeeks} weeks • ${_fmtDateLocal(c.startDate)} • Cost: ${c.cost}'),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.save_alt),
+                  label: const Text('Submit Admission Form'),
+                  onPressed: () async {
+                    final bloc = context.read<AdmissionBloc>();
+                    final st = bloc.state;
+                    if (st is! AdmissionLoaded) return;
+                    if (st.selectedForForm.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select at least one class')));
+                      return;
+                    }
+                    // Submit
+                    try {
+                      await Future.microtask(() => bloc.add(SubmitAdmissionForm()));
+                      if (context.mounted) {
+                        Navigator.pop(context); // close sheet
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Admission form submitted')));
+                      }
+                    } catch (_) {}
+                  },
+                ),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }
