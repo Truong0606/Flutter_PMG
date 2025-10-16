@@ -11,4 +11,17 @@ abstract class StudentRepository {
     String? householdRegistrationImg,
     String? birthCertificateImg,
   });
+
+  Future<void> deleteStudent(int id);
+
+  Future<Student> updateStudent({
+    required int id,
+    required String name,
+    required String gender,
+    required String dateOfBirth, // yyyy-MM-dd
+    String? placeOfBirth,
+    String? profileImage,
+    String? householdRegistrationImg,
+    String? birthCertificateImg,
+  });
 }

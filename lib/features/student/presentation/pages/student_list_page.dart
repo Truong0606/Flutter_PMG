@@ -47,7 +47,11 @@ class StudentListPage extends StatelessWidget {
                       context,
                       '/student/detail',
                       arguments: students[i],
-                    );
+                    ).then((res) {
+                      if (res == true && context.mounted) {
+                        context.read<StudentBloc>().add(LoadStudents());
+                      }
+                    });
                   }
                 },
               ),

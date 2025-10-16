@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/student_bloc.dart';
 import '../../domain/entities/student.dart';
 
 class StudentDetailPage extends StatelessWidget {
@@ -12,7 +14,55 @@ class StudentDetailPage extends StatelessWidget {
         : const Student(id: 0, name: '', gender: '', dateOfBirth: '');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Child Detail')),
+      appBar: AppBar(
+        title: const Text('Child Detail'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit',
+            onPressed: () async {
+              final updated = await Navigator.pushNamed(context, '/student/edit', arguments: s);
+              if (updated == true && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Delete',
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Delete Child'),
+                  content: Text('Are you sure you want to delete "${s.name.isEmpty ? 'this child' : s.name}"? This action cannot be undone.'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                    FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
+                  ],
+                ),
+              );
+              if (confirm == true) {
+                try {
+                  await context.read<StudentBloc>().repository.deleteStudent(s.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Child deleted')),
+                    );
+                    Navigator.pop(context, true);
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Delete failed: $e')),
+                    );
+                  }
+                }
+              }
+            },
+          )
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -25,6 +75,7 @@ class StudentDetailPage extends StatelessWidget {
           const SizedBox(height: 12),
           const Divider(),
           const SizedBox(height: 12),
+          _kv('ID', s.id.toString()),
           _kv('Gender', s.gender),
           _kv('Date of Birth', s.dateOfBirth),
           _kv('Place of Birth', s.placeOfBirth ?? '-'),

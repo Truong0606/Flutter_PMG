@@ -19,6 +19,7 @@ import 'features/student/presentation/bloc/student_bloc.dart';
 import 'features/student/presentation/pages/student_list_page.dart';
 import 'features/student/presentation/pages/student_create_page.dart';
 import 'features/student/presentation/pages/student_detail_page.dart';
+import 'features/student/presentation/pages/student_edit_page.dart';
 import 'features/admission/data/repositories/admission_repository_impl.dart';
 import 'features/admission/presentation/bloc/admission_bloc.dart';
 import 'features/admission/presentation/pages/admission_form_page.dart';
@@ -74,6 +75,7 @@ class MyApp extends StatelessWidget {
           '/student/list': (context) => const StudentListPage(),
           '/student/create': (context) => const StudentCreatePage(),
           '/student/detail': (context) => const StudentDetailPage(),
+          '/student/edit': (context) => const StudentEditPage(),
           '/hr/dashboard': (context) => const HomePage(), // Placeholder
           '/education/dashboard': (context) => const HomePage(), // Placeholder
         },

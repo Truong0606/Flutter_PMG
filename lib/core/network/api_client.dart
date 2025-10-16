@@ -197,6 +197,21 @@ class ApiClient {
     }
   }
 
+  Future<http.Response> deleteParent(String endpoint) async {
+    final url = Uri.parse('$parentBaseUrl$endpoint');
+    final headers = await _getHeaders();
+    if (kDebugMode) {
+      debugPrint('[ApiClient] DELETE(parent) $url');
+    }
+    try {
+      final response = await http.delete(url, headers: headers);
+      await _handleAuthErrors(response);
+      return response;
+    } catch (e) {
+      throw _handleException(e);
+    }
+  }
+
   Future<void> _handleAuthErrors(http.Response response) async {
     if (response.statusCode == 401 || response.statusCode == 403) {
       await _storageService.clearAuthData();

@@ -37,8 +37,19 @@ class Student {
       if (uri == null) return null;
       return (uri.scheme == 'http' || uri.scheme == 'https') ? s : null;
     }
+    // Support multiple id key variants from backend
+    final intId = () {
+      final keys = ['id', 'studentId', 'childId'];
+      for (final k in keys) {
+        final v = json[k];
+        final n = toInt(v);
+        if (n > 0) return n;
+      }
+      return 0;
+    }();
+
     return Student(
-      id: toInt(json['id']),
+      id: intId,
       name: (json['name'] ?? '').toString(),
       gender: (json['gender'] ?? '').toString(),
       dateOfBirth: (json['dateOfBirth'] ?? '').toString(),
