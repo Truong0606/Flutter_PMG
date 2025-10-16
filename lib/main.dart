@@ -23,6 +23,8 @@ import 'features/student/presentation/pages/student_edit_page.dart';
 import 'features/admission/data/repositories/admission_repository_impl.dart';
 import 'features/admission/presentation/bloc/admission_bloc.dart';
 import 'features/admission/presentation/pages/admission_form_page.dart';
+import 'features/admission/presentation/pages/admission_form_list_page.dart';
+import 'features/admission/presentation/pages/admission_form_detail_page.dart';
 import 'features/student/domain/entities/student.dart' as student_domain;
 
 void main() {
@@ -78,6 +80,8 @@ class MyApp extends StatelessWidget {
           '/student/edit': (context) => const StudentEditPage(),
           '/hr/dashboard': (context) => const HomePage(), // Placeholder
           '/education/dashboard': (context) => const HomePage(), // Placeholder
+          '/admission/forms': (context) => const AdmissionFormListPage(),
+          '/admission/form/detail': (context) => const AdmissionFormDetailPage(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == '/admission/form') {

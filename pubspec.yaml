@@ -39,6 +39,7 @@ dependencies:
   http: ^1.2.0
   # Pick images from gallery/camera
   image_picker: ^1.1.2
+  url_launcher: ^6.3.0
   # Required by CloudinaryService for multipart content types
   http_parser: ^4.0.2
   
@@ -59,6 +60,7 @@ dependencies:
   
   # Dependency injection
   get_it: ^7.6.7
+  webview_flutter: ^4.7.0
 
 dev_dependencies:
   flutter_test:
