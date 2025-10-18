@@ -1,4 +1,5 @@
 import 'package:first_app/features/teacher/data/models/teacher_model.dart';
+import 'package:first_app/features/teacher/data/models/schedule_model.dart';
 import '../../domain/entities/classes.dart';
 
 class ClassModel extends Classes {
@@ -17,6 +18,21 @@ class ClassModel extends Classes {
   });
 
   factory ClassModel.fromJson(Map<String, dynamic> json) {
+    // Parse schedules array from JSON
+    final schedulesList = <ScheduleModel>[];
+    if (json['schedules'] is List) {
+      for (final scheduleJson in json['schedules']) {
+        if (scheduleJson is Map<String, dynamic>) {
+          try {
+            schedulesList.add(ScheduleModel.fromJson(scheduleJson));
+          } catch (e) {
+            // Skip invalid schedule entries
+            print('Error parsing schedule: $e');
+          }
+        }
+      }
+    }
+
     return ClassModel(
       id: json['id'] as int? ?? 0,
       academicYear: json['academicYear'] as int? ?? 0,
@@ -27,8 +43,7 @@ class ClassModel extends Classes {
       status: (json['status'] ?? '').toString(),
       syllabusId: json['syllabusId'] as int? ?? 0,
       teacherId: json['teacherId'] as int? ?? 0,
-      schedules:
-          [], // Avoid circular dependency - schedules will be loaded separately
+      schedules: schedulesList,
       teacher: json['teacher'] != null
           ? TeacherModel.fromJson(json['teacher'] as Map<String, dynamic>)
           : null,

@@ -15,7 +15,7 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
 
   @override
   Future<List<Classes>> getClassList() async {
-    final resp = await _apiClient.get('/auth-api/api/teacher/classes');
+    final resp = await _apiClient.get('/teacher/classes');
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
       if (resp.body.isEmpty) return [];
       final data = jsonDecode(resp.body) as List;
@@ -31,7 +31,7 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
   @override
   Future<List<Schedule>> getScheduleList() async {
     try {
-      final resp = await _apiClient.get('/auth-api/api/teacher/schedules');
+      final resp = await _apiClient.get('/teacher/schedules');
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
         if (resp.body.isEmpty) return [];
         final List<dynamic> jsonData = jsonDecode(resp.body);
@@ -61,8 +61,7 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
   Future<List<Schedule>> getWeeklySchedule(String weekName) async {
     try {
       final encodedWeekName = Uri.encodeComponent(weekName);
-      final endpoint =
-          '/auth-api/api/teacher/schedules/weekly?weekName=$encodedWeekName';
+      final endpoint = '/teacher/schedules/weekly?weekName=$encodedWeekName';
 
       if (kDebugMode) {
         print('[TeacherRepo] Fetching schedule: $endpoint');
