@@ -1,10 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:first_app/core/network/api_client.dart';
-import 'package:first_app/features/teacher/data/models/activity_model.dart';
 import 'package:first_app/features/teacher/data/models/class_model.dart';
 import 'package:first_app/features/teacher/data/models/schedule_model.dart';
-import 'package:first_app/features/teacher/domain/entities/activity.dart';
 import 'package:first_app/features/teacher/domain/entities/classes.dart';
 import 'package:first_app/features/teacher/domain/entities/schedule.dart';
 import 'package:first_app/features/teacher/domain/repositories/teacher_repository.dart';
@@ -15,8 +14,8 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
   TeacherActionRepositoryImpl(this._apiClient);
 
   @override
-  Future<List<Classes>> getClassesByTeacherId(int teacherId) async {
-    final resp = await _apiClient.get('/auth-api/api/teacher/classes?teacherId=$teacherId');
+  Future<List<Classes>> getClassList() async {
+    final resp = await _apiClient.get('/auth-api/api/teacher/classes');
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
       if (resp.body.isEmpty) return [];
       final data = jsonDecode(resp.body) as List;
@@ -24,64 +23,104 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
           .map((e) => ClassModel.fromJson(e as Map<String, dynamic>))
           .toList();
     }
-    throw Exception('Failed to load classes (${resp.statusCode})');
-  }
-
-  @override
-  Future<Classes?> getClassDetail(int classId, int teacherId) async {
-    final resp = await _apiClient.get(
-      '/auth-api/api/teacher/classes/$classId?teacherId=$teacherId',
+    throw Exception(
+      'Failed to load classes (${resp.statusCode}): ${resp.body}',
     );
-    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      if (resp.body.isEmpty) return null;
-      return ClassModel.fromJson(jsonDecode(resp.body) as Map<String, dynamic>);
-    }
-    throw Exception('Failed to load class detail (${resp.statusCode})');
   }
 
   @override
-  Future<List<Schedule>> getSchedulesByTeacherId(int teacherId) async {
-    final resp = await _apiClient.get(
-      '/auth-api/api/teacher/schedules?teacherId=$teacherId',
-    );
-    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      if (resp.body.isEmpty) return [];
-      final data = jsonDecode(resp.body) as List;
-      return data
-          .map((e) => ScheduleModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+  Future<List<Schedule>> getScheduleList() async {
+    try {
+      final resp = await _apiClient.get('/auth-api/api/teacher/schedules');
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        if (resp.body.isEmpty) return [];
+        final List<dynamic> jsonData = jsonDecode(resp.body);
+        final schedules = jsonData
+            .map((item) {
+              if (item is! Map<String, dynamic>) return null;
+              try {
+                return ScheduleModel.fromJson(item);
+              } catch (e) {
+                return null;
+              }
+            })
+            .where((schedule) => schedule != null)
+            .cast<Schedule>()
+            .toList();
+        return schedules;
+      }
+      throw Exception(
+        'Failed to load schedules (${resp.statusCode}): ${resp.body}',
+      );
+    } catch (e) {
+      throw Exception('Error loading schedules: ${e.toString()}');
     }
-    throw Exception('Failed to load schedules (${resp.statusCode})');
   }
 
   @override
-  Future<List<Activity>> getActivitiesByScheduleId(int scheduleId) async {
-    final resp = await _apiClient.get('/auth-api/api/schedules/$scheduleId/activities');
-    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      if (resp.body.isEmpty) return [];
-      final data = jsonDecode(resp.body) as List;
-      return data
-          .map((e) => ActivityModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-    }
-    throw Exception('Failed to load activities (${resp.statusCode})');
-  }
+  Future<List<Schedule>> getWeeklySchedule(String weekName) async {
+    try {
+      final encodedWeekName = Uri.encodeComponent(weekName);
+      final endpoint =
+          '/auth-api/api/teacher/schedules/weekly?weekName=$encodedWeekName';
 
-  @override
-  Future<List<Schedule>> getWeeklySchedule(
-    int teacherId,
-    String weekName,
-  ) async {
-    final resp = await _apiClient.get(
-      '/auth-api/api/teacher/schedules/weekly?teacherId=$teacherId&weekName=$weekName',
-    );
-    if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      if (resp.body.isEmpty) return [];
-      final data = jsonDecode(resp.body) as List;
-      return data
-          .map((e) => ScheduleModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      if (kDebugMode) {
+        print('[TeacherRepo] Fetching schedule: $endpoint');
+      }
+      final resp = await _apiClient.get(endpoint);
+
+      if (resp.statusCode == 401) {
+        throw Exception('Unauthorized: Please log in again');
+      }
+
+      if (resp.statusCode >= 200 && resp.statusCode < 300) {
+        if (resp.body.isEmpty) return [];
+
+        if (kDebugMode) {
+          print('[TeacherRepo] Raw response: ${resp.body}');
+        }
+
+        final List<dynamic> jsonData = jsonDecode(resp.body);
+        final schedules = jsonData
+            .map((item) {
+              if (item is! Map<String, dynamic>) {
+                if (kDebugMode) {
+                  print('[TeacherRepo] Invalid item format: $item');
+                }
+                return null;
+              }
+
+              try {
+                return ScheduleModel.fromJson(item);
+              } catch (e) {
+                if (kDebugMode) {
+                  print('[TeacherRepo] Parse error: $e');
+                }
+                return null;
+              }
+            })
+            .where((schedule) => schedule != null)
+            .cast<Schedule>()
+            .toList();
+
+        if (kDebugMode) {
+          print(
+            '[TeacherRepo] Parsed ${schedules.length} schedules successfully',
+          );
+        }
+
+        return schedules;
+      }
+
+      if (kDebugMode) {
+        print('[TeacherRepo] API Error: ${resp.statusCode} - ${resp.body}');
+      }
+      throw Exception('Failed to load weekly schedule (${resp.statusCode})');
+    } catch (e) {
+      if (kDebugMode) {
+        print('[TeacherRepo] Error: $e');
+      }
+      rethrow;
     }
-    throw Exception('Failed to load weekly schedule (${resp.statusCode})');
   }
 }

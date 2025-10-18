@@ -1,7 +1,4 @@
-
-import 'package:first_app/features/teacher/data/models/schedule_model.dart';
 import 'package:first_app/features/teacher/data/models/teacher_model.dart';
-
 import '../../domain/entities/classes.dart';
 
 class ClassModel extends Classes {
@@ -21,20 +18,19 @@ class ClassModel extends Classes {
 
   factory ClassModel.fromJson(Map<String, dynamic> json) {
     return ClassModel(
-      id: json['id'],
-      academicYear: json['academicYear'],
-      endDate: json['endDate'],
-      name: json['name'],
-      numberStudent: json['numberStudent'],
-      startDate: json['startDate'],
-      status: json['status'],
-      syllabusId: json['syllabusId'],
-      teacherId: json['teacherId'],
-      schedules: (json['schedules'] as List)
-          .map((schedule) => ScheduleModel.fromJson(schedule))
-          .toList(),
+      id: json['id'] as int? ?? 0,
+      academicYear: json['academicYear'] as int? ?? 0,
+      endDate: (json['endDate'] ?? '').toString(),
+      name: (json['name'] ?? '').toString(),
+      numberStudent: json['numberStudent'] as int? ?? 0,
+      startDate: (json['startDate'] ?? '').toString(),
+      status: (json['status'] ?? '').toString(),
+      syllabusId: json['syllabusId'] as int? ?? 0,
+      teacherId: json['teacherId'] as int? ?? 0,
+      schedules:
+          [], // Avoid circular dependency - schedules will be loaded separately
       teacher: json['teacher'] != null
-          ? TeacherModel.fromJson(json['teacher'])
+          ? TeacherModel.fromJson(json['teacher'] as Map<String, dynamic>)
           : null,
     );
   }

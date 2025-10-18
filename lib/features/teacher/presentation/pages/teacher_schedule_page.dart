@@ -1,162 +1,150 @@
 import 'package:first_app/core/network/api_client.dart';
 import 'package:first_app/core/services/storage_service.dart';
-import 'package:first_app/features/authentication/presentation/bloc/auth_bloc.dart';
-import 'package:first_app/features/authentication/presentation/bloc/auth_event_state.dart';
 import 'package:first_app/features/teacher/data/repositories/teacher_repository_impl.dart';
 import 'package:first_app/features/teacher/presentation/bloc/teacher_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TeacherSchedulePage extends StatelessWidget {
-  const TeacherSchedulePage({Key? key}) : super(key: key);
+  const TeacherSchedulePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 2,
-        shadowColor: Colors.black.withValues(alpha: 0.1),
-        title: const Text(
-          'My Schedules',
-          style: TextStyle(
-            color: Color(0xFF2C3E50),
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+    return BlocProvider(
+      create: (context) =>
+          TeacherBloc(TeacherActionRepositoryImpl(ApiClient(StorageService())))
+            ..add(LoadSchedules()),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 2,
+          shadowColor: Colors.black.withOpacity(0.1),
+          title: const Text(
+            'My Schedules',
+            style: TextStyle(
+              color: Color(0xFF2C3E50),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          iconTheme: const IconThemeData(color: Color(0xFF2C3E50)),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.calendar_view_week),
+              onPressed: () {
+                Navigator.pushNamed(context, '/teacher-weekly-schedule');
+              },
+              tooltip: 'Weekly View',
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
-        iconTheme: const IconThemeData(color: Color(0xFF2C3E50)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_view_week),
-            onPressed: () {
-              Navigator.pushNamed(context, '/teacher-weekly-schedule');
-            },
-            tooltip: 'Weekly View',
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, authState) {
-          if (authState is AuthAuthenticated) {
-            return BlocProvider(
-              create: (context) => TeacherBloc(
-                TeacherActionRepositoryImpl(ApiClient(StorageService())),
-              )..add(LoadSchedulesByTeacher(int.parse(authState.user.id))),
-              child: BlocBuilder<TeacherBloc, TeacherState>(
-                builder: (context, state) {
-                  if (state is TeacherLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3498DB)),
-                      ),
-                    );
-                  }
-                  if (state is TeacherLoadedSchedules) {
-                    if (state.schedules.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.schedule_outlined,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No schedules found',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'You don\'t have any schedules assigned yet.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
+        body: BlocProvider(
+          create: (context) => TeacherBloc(
+            TeacherActionRepositoryImpl(ApiClient(StorageService())),
+          )..add(LoadSchedules()),
+          child: BlocBuilder<TeacherBloc, TeacherState>(
+            builder: (context, state) {
+              if (state is TeacherLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Color(0xFF3498DB),
+                    ),
+                  ),
+                );
+              }
+              if (state is TeacherLoadedSchedules) {
+                if (state.schedules.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.schedule_outlined,
+                          size: 64,
+                          color: Colors.grey[400],
                         ),
-                      );
-                    }
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.schedules.length,
-                      itemBuilder: (context, index) {
-                        final schedule = state.schedules[index];
-                        return _buildScheduleCard(context, schedule);
-                      },
-                    );
-                  }
-                  if (state is TeacherError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.red[400],
+                        const SizedBox(height: 16),
+                        Text(
+                          'No schedules found',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[600],
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error loading schedules',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[600],
-                            ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'You don\'t have any schedules assigned yet.',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[500],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            state.message,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<TeacherBloc>().add(
-                                LoadSchedulesByTeacher(int.parse(authState.user.id)),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF3498DB),
-                              foregroundColor: Colors.white,
-                            ),
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return const Center(
-                    child: Text(
-                      'Please wait...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF2C3E50),
-                      ),
+                        ),
+                      ],
                     ),
                   );
-                },
-              ),
-            );
-          }
-          return const Center(
-            child: Text('Please login to view schedules'),
-          );
-        },
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: state.schedules.length,
+                  itemBuilder: (context, index) {
+                    final schedule = state.schedules[index];
+                    return _buildScheduleCard(context, schedule);
+                  },
+                );
+              }
+              if (state is TeacherError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error loading schedules',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        state.message,
+                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<TeacherBloc>().add(LoadSchedules());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3498DB),
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const Center(
+                child: Text(
+                  'Please wait...',
+                  style: TextStyle(fontSize: 16, color: Color(0xFF2C3E50)),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -165,9 +153,7 @@ class TeacherSchedulePage extends StatelessWidget {
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -180,7 +166,7 @@ class TeacherSchedulePage extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF3498DB).withValues(alpha: 0.1),
+                    color: const Color(0xFF3498DB).withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -195,7 +181,7 @@ class TeacherSchedulePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        schedule.weekName,
+                        schedule.weekName ?? '',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -216,9 +202,12 @@ class TeacherSchedulePage extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF27AE60).withValues(alpha: 0.1),
+                    color: const Color(0xFF27AE60).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -233,7 +222,6 @@ class TeacherSchedulePage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
             // Activities list
             if (schedule.activities.isNotEmpty) ...[
               const Text(
@@ -245,7 +233,9 @@ class TeacherSchedulePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              ...schedule.activities.map((activity) => _buildActivityItem(activity)),
+              ...schedule.activities.map(
+                (activity) => _buildActivityItem(activity),
+              ),
             ] else ...[
               Container(
                 padding: const EdgeInsets.all(16),
@@ -255,18 +245,11 @@ class TeacherSchedulePage extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.grey[600],
-                      size: 20,
-                    ),
+                    Icon(Icons.info_outline, color: Colors.grey[600], size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'No activities scheduled for this week',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
                     ),
                   ],
                 ),
@@ -322,26 +305,16 @@ class TeacherSchedulePage extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         activity.dayOfWeek!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       const SizedBox(width: 12),
                     ],
                     if (activity.date != null) ...[
-                      Icon(
-                        Icons.date_range,
-                        size: 12,
-                        color: Colors.grey[600],
-                      ),
+                      Icon(Icons.date_range, size: 12, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(
                         _formatDate(activity.date!),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ],
@@ -358,10 +331,7 @@ class TeacherSchedulePage extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         '${_formatTime(activity.startTime!)} - ${_formatTime(activity.endTime!)}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),

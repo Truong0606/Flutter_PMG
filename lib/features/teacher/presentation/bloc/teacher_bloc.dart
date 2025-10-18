@@ -1,29 +1,25 @@
 import 'package:first_app/features/teacher/domain/entities/classes.dart';
+import 'package:first_app/features/teacher/domain/entities/schedule.dart';
+import 'package:first_app/features/teacher/domain/repositories/teacher_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/schedule.dart';
-import '../../domain/repositories/teacher_repository.dart';
+// ==== EVENTS ====
 
 abstract class TeacherEvent {}
 
-class LoadClassesByTeacher extends TeacherEvent {
-  final int teacherId;
+/// Event lấy danh sách lớp
+class LoadTeacherClasses extends TeacherEvent {}
 
-  LoadClassesByTeacher(this.teacherId);
-}
+/// Event lấy tất cả schedule (KHÔNG truyền teacherId)
+class LoadSchedules extends TeacherEvent {}
 
-class LoadSchedulesByTeacher extends TeacherEvent {
-  final int teacherId;
-
-  LoadSchedulesByTeacher(this.teacherId);
-}
-
-class LoadWeeklyScheduleByTeacher extends TeacherEvent {
-  final int teacherId;
+/// Event lấy lịch tuần theo weekName (KHÔNG truyền teacherId)
+class LoadWeeklySchedule extends TeacherEvent {
   final String weekName;
-
-  LoadWeeklyScheduleByTeacher(this.teacherId, this.weekName);
+  LoadWeeklySchedule(this.weekName);
 }
+
+// ==== STATES ====
 
 abstract class TeacherState {}
 
@@ -33,61 +29,57 @@ class TeacherLoading extends TeacherState {}
 
 class TeacherLoadedClasses extends TeacherState {
   final List<Classes> classes;
-
   TeacherLoadedClasses(this.classes);
 }
 
 class TeacherLoadedSchedules extends TeacherState {
   final List<Schedule> schedules;
-
   TeacherLoadedSchedules(this.schedules);
 }
 
 class TeacherLoadedWeeklySchedules extends TeacherState {
   final List<Schedule> schedules;
-
   TeacherLoadedWeeklySchedules(this.schedules);
 }
 
 class TeacherError extends TeacherState {
   final String message;
-
   TeacherError(this.message);
 }
+
+// ==== BLOC ====
 
 class TeacherBloc extends Bloc<TeacherEvent, TeacherState> {
   final TeacherActionRepository repository;
 
   TeacherBloc(this.repository) : super(TeacherInitial()) {
-    on<LoadClassesByTeacher>((event, emit) async {
+    // Event lấy danh sách lớp
+    on<LoadTeacherClasses>((event, emit) async {
       emit(TeacherLoading());
       try {
-        final classes = await repository.getClassesByTeacherId(event.teacherId);
+        final classes = await repository.getClassList();
         emit(TeacherLoadedClasses(classes));
       } catch (e) {
         emit(TeacherError(e.toString()));
       }
     });
 
-    on<LoadSchedulesByTeacher>((event, emit) async {
+    // Event lấy danh sách schedule (KHÔNG truyền teacherId)
+    on<LoadSchedules>((event, emit) async {
       emit(TeacherLoading());
       try {
-        final schedules = await repository.getSchedulesByTeacherId(
-          event.teacherId,
-        );
+        final schedules = await repository.getScheduleList();
         emit(TeacherLoadedSchedules(schedules));
       } catch (e) {
         emit(TeacherError(e.toString()));
       }
     });
 
-    on<LoadWeeklyScheduleByTeacher>((event, emit) async {
+    // Event lấy lịch theo tuần (truyền weekName, KHÔNG truyền teacherId)
+    on<LoadWeeklySchedule>((event, emit) async {
       emit(TeacherLoading());
       try {
-        final schedules = await repository.getWeeklySchedule(
-          event.teacherId,
-          event.weekName,
-        );
+        final schedules = await repository.getWeeklySchedule(event.weekName);
         emit(TeacherLoadedWeeklySchedules(schedules));
       } catch (e) {
         emit(TeacherError(e.toString()));

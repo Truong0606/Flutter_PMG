@@ -13,16 +13,42 @@ class ScheduleModel extends Schedule {
   });
 
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
-    return ScheduleModel(
-      id: json['id'],
-      weekName: json['weekName'],
-      classesId: json['classesId'],
-      activities: (json['activities'] as List)
-          .map((activity) => ActivityModel.fromJson(activity))
-          .toList(),
-      classes: json['classes'] != null
-          ? ClassModel.fromJson(json['classes'])
-          : null,
-    );
+    try {
+      // Validate and convert activities list
+      final activities = <ActivityModel>[];
+      final activitiesList = json['activities'];
+      if (activitiesList is List) {
+        for (final activity in activitiesList) {
+          if (activity is Map<String, dynamic>) {
+            try {
+              activities.add(ActivityModel.fromJson(activity));
+            } catch (e) {
+              print('Error parsing activity: $e\nActivity data: $activity');
+            }
+          }
+        }
+      }
+
+      // Handle classes data
+      ClassModel? classModel;
+      final classesData = json['classes'];
+      if (classesData is Map<String, dynamic>) {
+        try {
+          classModel = ClassModel.fromJson(classesData);
+        } catch (e) {
+          print('Error parsing class: $e\nClass data: $classesData');
+        }
+      }
+
+      return ScheduleModel(
+        id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '') ?? 0,
+        weekName: (json['weekName'] ?? '').toString(),
+        classesId: json['classesId'] is int ? json['classesId'] : int.tryParse(json['classesId']?.toString() ?? '') ?? 0,
+        activities: activities,
+        classes: classModel,
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 }

@@ -16,15 +16,15 @@ class ActivityModel extends Activity {
 
   factory ActivityModel.fromJson(Map<String, dynamic> json) {
     return ActivityModel(
-      id: json['id'],
-      date: json['date'],
-      dayOfWeek: json['dayOfWeek'],
-      endTime: json['endTime'],
-      name: json['name'],
-      startTime: json['startTime'],
-      scheduleId: json['scheduleId'],
+      id: json['id'] as int? ?? 0,
+      date: json['date']?.toString(),
+      dayOfWeek: json['dayOfWeek']?.toString(),
+      endTime: json['endTime']?.toString(),
+      name: (json['name'] ?? '').toString(),
+      startTime: json['startTime']?.toString(),
+      scheduleId: json['scheduleId'] as int?,
       schedule: json['schedule'] != null
-          ? ScheduleModel.fromJson(json['schedule'])
+          ? ScheduleModel.fromJson(json['schedule'] as Map<String, dynamic>)
           : null,
     );
   }

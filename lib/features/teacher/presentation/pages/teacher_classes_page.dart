@@ -3,12 +3,13 @@ import 'package:first_app/core/services/storage_service.dart';
 import 'package:first_app/features/authentication/presentation/bloc/auth_bloc.dart';
 import 'package:first_app/features/authentication/presentation/bloc/auth_event_state.dart';
 import 'package:first_app/features/teacher/data/repositories/teacher_repository_impl.dart';
+import 'package:first_app/features/teacher/presentation/pages/teacher_class_detail_page.dart';
 import 'package:first_app/features/teacher/presentation/bloc/teacher_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TeacherClassesPage extends StatelessWidget {
-  const TeacherClassesPage({Key? key}) : super(key: key);
+  const TeacherClassesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,20 +33,22 @@ class TeacherClassesPage extends StatelessWidget {
         builder: (context, authState) {
           if (authState is AuthAuthenticated) {
             return BlocProvider(
-        create: (context) => TeacherBloc(
-          TeacherActionRepositoryImpl(ApiClient(StorageService())),
-              )..add(LoadClassesByTeacher(int.parse(authState.user.id))),
-        child: BlocBuilder<TeacherBloc, TeacherState>(
-          builder: (context, state) {
-            if (state is TeacherLoading) {
+              create: (context) => TeacherBloc(
+                TeacherActionRepositoryImpl(ApiClient(StorageService())),
+              )..add(LoadTeacherClasses()),
+              child: BlocBuilder<TeacherBloc, TeacherState>(
+                builder: (context, state) {
+                  if (state is TeacherLoading) {
                     return const Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3498DB)),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFF3498DB),
+                        ),
                       ),
                     );
-            }
-            if (state is TeacherLoadedClasses) {
-              if (state.classes.isEmpty) {
+                  }
+                  if (state is TeacherLoadedClasses) {
+                    if (state.classes.isEmpty) {
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -75,12 +78,12 @@ class TeacherClassesPage extends StatelessWidget {
                           ],
                         ),
                       );
-              }
-              return ListView.builder(
+                    }
+                    return ListView.builder(
                       padding: const EdgeInsets.all(16),
-                itemCount: state.classes.length,
-                itemBuilder: (context, index) {
-                  final classInfo = state.classes[index];
+                      itemCount: state.classes.length,
+                      itemBuilder: (context, index) {
+                        final classInfo = state.classes[index];
                         return _buildClassCard(context, classInfo);
                       },
                     );
@@ -117,7 +120,7 @@ class TeacherClassesPage extends StatelessWidget {
                           ElevatedButton(
                             onPressed: () {
                               context.read<TeacherBloc>().add(
-                                LoadClassesByTeacher(int.parse(authState.user.id)),
+                                LoadTeacherClasses(),
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -133,19 +136,14 @@ class TeacherClassesPage extends StatelessWidget {
                   return const Center(
                     child: Text(
                       'Please wait...',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF2C3E50),
-                      ),
+                      style: TextStyle(fontSize: 16, color: Color(0xFF2C3E50)),
                     ),
                   );
                 },
               ),
             );
           }
-          return const Center(
-            child: Text('Please login to view classes'),
-          );
+          return const Center(child: Text('Please login to view classes'));
         },
       ),
     );
@@ -155,16 +153,14 @@ class TeacherClassesPage extends StatelessWidget {
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to class detail page
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Class detail for ${classInfo.name} coming soon!'),
-              backgroundColor: const Color(0xFF3498DB),
+          print('Navigating to class detail: ${classInfo.name}');
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => TeacherClassDetailPage(classInfo: classInfo),
             ),
           );
         },
@@ -214,9 +210,12 @@ class TeacherClassesPage extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: classInfo.status == 'active' 
+                      color: classInfo.status == 'active'
                           ? const Color(0xFF27AE60).withValues(alpha: 0.1)
                           : const Color(0xFFE74C3C).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -226,7 +225,7 @@ class TeacherClassesPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: classInfo.status == 'active' 
+                        color: classInfo.status == 'active'
                             ? const Color(0xFF27AE60)
                             : const Color(0xFFE74C3C),
                       ),
@@ -263,11 +262,7 @@ class TeacherClassesPage extends StatelessWidget {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Icon(
-                      Icons.schedule,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
+                    Icon(Icons.schedule, size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 8),
                     Text(
                       '${classInfo.schedules.length} Schedules',
@@ -302,11 +297,7 @@ class TeacherClassesPage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              size: 16,
-              color: color,
-            ),
+            Icon(icon, size: 16, color: color),
             const SizedBox(height: 4),
             Text(
               value,
@@ -318,10 +309,7 @@ class TeacherClassesPage extends StatelessWidget {
             ),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 10, color: Colors.grey[600]),
             ),
           ],
         ),
