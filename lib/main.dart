@@ -6,6 +6,9 @@ import 'features/authentication/presentation/pages/register_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/hr/presentation/pages/hr_webapp_notice_page.dart';
 import 'features/teacher/presentation/pages/teacher_dashboard_page.dart';
+import 'features/teacher/presentation/pages/teacher_classes_page.dart';
+import 'features/teacher/presentation/pages/teacher_schedule_page.dart';
+import 'features/teacher/presentation/pages/teacher_weekly_schedule_page.dart';
 import 'features/parent/presentation/pages/parent_dashboard_page.dart';
 import 'features/authentication/presentation/pages/forgot_password_page.dart';
 import 'features/authentication/presentation/pages/reset_password_page.dart';
@@ -73,6 +76,9 @@ class MyApp extends StatelessWidget {
           '/profile': (context) => const ProfilePage(),
           '/hr-webapp-notice': (context) => const HRWebappNoticePage(),
           '/teacher-dashboard': (context) => const TeacherDashboardPage(),
+          '/teacher-classes': (context) => const TeacherClassesPage(),
+          '/teacher-schedules': (context) => const TeacherSchedulePage(),
+          '/teacher-weekly-schedule': (context) => const TeacherWeeklySchedulePage(),
           '/parent-dashboard': (context) => const ParentDashboardPage(),
           '/student/list': (context) => const StudentListPage(),
           '/student/create': (context) => const StudentCreatePage(),
