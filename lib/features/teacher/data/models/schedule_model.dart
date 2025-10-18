@@ -1,5 +1,6 @@
 import '../../domain/entities/schedule.dart';
 import 'activity_model.dart';
+import 'class_model.dart';
 
 class ScheduleModel extends Schedule {
   const ScheduleModel({
@@ -27,6 +28,17 @@ class ScheduleModel extends Schedule {
         }
       }
 
+      // Parse classes data from API response (skip schedules to avoid circular dependency)
+      ClassModel? classModel;
+      final classesData = json['classes'];
+      if (classesData is Map<String, dynamic>) {
+        try {
+          classModel = ClassModel.fromJson(classesData, parseSchedules: false);
+        } catch (e) {
+          print('Error parsing class: $e\nClass data: $classesData');
+        }
+      }
+
       return ScheduleModel(
         id: json['id'] is int
             ? json['id']
@@ -36,7 +48,7 @@ class ScheduleModel extends Schedule {
             ? json['classesId']
             : int.tryParse(json['classesId']?.toString() ?? '') ?? 0,
         activities: activities,
-        classes: null, // Avoid circular dependency
+        classes: classModel,
       );
     } catch (e) {
       rethrow;

@@ -17,10 +17,13 @@ class ClassModel extends Classes {
     super.teacher,
   });
 
-  factory ClassModel.fromJson(Map<String, dynamic> json) {
-    // Parse schedules array from JSON
+  factory ClassModel.fromJson(
+    Map<String, dynamic> json, {
+    bool parseSchedules = true,
+  }) {
+    // Parse schedules array from JSON only when explicitly requested
     final schedulesList = <ScheduleModel>[];
-    if (json['schedules'] is List) {
+    if (parseSchedules && json['schedules'] is List) {
       for (final scheduleJson in json['schedules']) {
         if (scheduleJson is Map<String, dynamic>) {
           try {

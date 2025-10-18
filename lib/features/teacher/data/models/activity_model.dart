@@ -1,6 +1,4 @@
-
 import '../../domain/entities/activity.dart';
-import 'schedule_model.dart';
 
 class ActivityModel extends Activity {
   ActivityModel({
@@ -23,9 +21,7 @@ class ActivityModel extends Activity {
       name: (json['name'] ?? '').toString(),
       startTime: json['startTime']?.toString(),
       scheduleId: json['scheduleId'] as int?,
-      schedule: json['schedule'] != null
-          ? ScheduleModel.fromJson(json['schedule'] as Map<String, dynamic>)
-          : null,
+      schedule: null, // Avoid circular dependency with ScheduleModel
     );
   }
 }

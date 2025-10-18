@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:first_app/core/network/api_client.dart';
 import 'package:first_app/features/teacher/data/models/class_model.dart';
 import 'package:first_app/features/teacher/data/models/schedule_model.dart';
@@ -61,11 +59,8 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
   Future<List<Schedule>> getWeeklySchedule(String weekName) async {
     try {
       final encodedWeekName = Uri.encodeComponent(weekName);
-      final endpoint = '/teacher/schedules/weekly?weekName=$encodedWeekName';
+      final endpoint = '/teacher/schedules?weekName=$encodedWeekName';
 
-      if (kDebugMode) {
-        print('[TeacherRepo] Fetching schedule: $endpoint');
-      }
       final resp = await _apiClient.get(endpoint);
 
       if (resp.statusCode == 401) {
@@ -75,26 +70,18 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
         if (resp.body.isEmpty) return [];
 
-        if (kDebugMode) {
-          print('[TeacherRepo] Raw response: ${resp.body}');
-        }
-
         final List<dynamic> jsonData = jsonDecode(resp.body);
+
         final schedules = jsonData
             .map((item) {
               if (item is! Map<String, dynamic>) {
-                if (kDebugMode) {
-                  print('[TeacherRepo] Invalid item format: $item');
-                }
                 return null;
               }
 
               try {
-                return ScheduleModel.fromJson(item);
+                final schedule = ScheduleModel.fromJson(item);
+                return schedule;
               } catch (e) {
-                if (kDebugMode) {
-                  print('[TeacherRepo] Parse error: $e');
-                }
                 return null;
               }
             })
@@ -102,23 +89,11 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
             .cast<Schedule>()
             .toList();
 
-        if (kDebugMode) {
-          print(
-            '[TeacherRepo] Parsed ${schedules.length} schedules successfully',
-          );
-        }
-
         return schedules;
       }
 
-      if (kDebugMode) {
-        print('[TeacherRepo] API Error: ${resp.statusCode} - ${resp.body}');
-      }
       throw Exception('Failed to load weekly schedule (${resp.statusCode})');
     } catch (e) {
-      if (kDebugMode) {
-        print('[TeacherRepo] Error: $e');
-      }
       rethrow;
     }
   }
