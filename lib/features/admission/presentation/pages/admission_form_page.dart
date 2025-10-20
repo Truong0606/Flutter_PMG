@@ -401,7 +401,7 @@ class _SelectClassesSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String _fmtDateLocal(String s) {
+    String fmtDateLocal(String s) {
       if (s.isEmpty) return s;
       try {
         final d = DateTime.parse(s);
@@ -455,7 +455,7 @@ class _SelectClassesSheet extends StatelessWidget {
                           value: checked,
                           onChanged: (_) => context.read<AdmissionBloc>().add(ToggleSelectedForForm(c.id)),
                           title: Text(c.name),
-                          subtitle: Text('${c.academicYear} • ${c.numberOfWeeks} weeks • ${_fmtDateLocal(c.startDate)} • Cost: ${c.cost}'),
+                          subtitle: Text('${c.academicYear} • ${c.numberOfWeeks} weeks • ${fmtDateLocal(c.startDate)} • Cost: ${c.cost}'),
                         );
                       },
                     );

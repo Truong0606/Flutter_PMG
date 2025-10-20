@@ -176,7 +176,7 @@ class _StudentEditPageState extends State<StudentEditPage> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: _gender,
+                    initialValue: _gender,
                     decoration: const InputDecoration(labelText: 'Gender', border: OutlineInputBorder()),
                     items: const [
                       DropdownMenuItem(value: 'Male', child: Text('Male')),
