@@ -4,6 +4,7 @@ import '../../domain/entities/student.dart';
 
 abstract class StudentEvent {}
 class LoadStudents extends StudentEvent {}
+class ClearStudents extends StudentEvent {}
 class CreateStudent extends StudentEvent {
   final String name;
   final String gender;
@@ -58,6 +59,10 @@ class StudentUpdated extends StudentState { final Student student; StudentUpdate
 class StudentBloc extends Bloc<StudentEvent, StudentState> {
   final StudentRepository repository;
   StudentBloc(this.repository) : super(StudentInitial()) {
+    on<ClearStudents>((event, emit) async {
+      // Reset to initial so UI doesn't show stale list between accounts
+      emit(StudentInitial());
+    });
     on<LoadStudents>((event, emit) async {
       emit(StudentLoading());
       try {

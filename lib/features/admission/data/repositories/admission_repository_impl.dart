@@ -87,4 +87,21 @@ class AdmissionRepositoryImpl implements AdmissionRepository {
     }
     throw Exception('Failed to fetch payment URL (${resp.statusCode})');
   }
+
+  @override
+  Future<Map<String, dynamic>> confirmAdmissionPayment(Map<String, String> queryParams) async {
+    // Build the query string for GET /admissionForm/paymentUrl/confirm
+    final uri = Uri(
+      path: '/admissionForm/paymentUrl/confirm',
+      queryParameters: queryParams,
+    );
+    final resp = await _api.getParent(uri.toString());
+    if (resp.statusCode >= 200 && resp.statusCode < 300) {
+      if (resp.body.isEmpty) return <String, dynamic>{};
+      final map = jsonDecode(resp.body);
+      if (map is Map<String, dynamic>) return map;
+      return {'raw': resp.body};
+    }
+    throw Exception('Failed to confirm payment (${resp.statusCode})');
+  }
 }

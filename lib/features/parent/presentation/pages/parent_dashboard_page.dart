@@ -47,18 +47,10 @@ class ParentDashboardPage extends StatelessWidget {
                 const SizedBox(height: 8),
                 _DashboardCard(
                   title: 'Child',
-                  subtitle: 'Admissions • Attendance • Results',
+                  subtitle: 'Admissions • Schedule',
                   icon: Icons.child_care,
                   accentColor: const Color(0xFFFF6B35),
                   onTap: () => _showChildMenu(context),
-                ),
-                const SizedBox(height: 16),
-                _DashboardCard(
-                  title: 'Teacher',
-                  subtitle: 'Contact • Schedule • Messages',
-                  icon: Icons.school_outlined,
-                  accentColor: const Color(0xFF3498DB),
-                  onTap: () => _showTeacherMenu(context),
                 ),
               ],
             ),
@@ -105,60 +97,23 @@ class ParentDashboardPage extends StatelessWidget {
               },
             ),
             _BottomSheetItem(
-              icon: Icons.event_available_outlined,
-              label: 'Attendance',
-              onTap: () => _comingSoon(context, 'Attendance'),
-            ),
-            _BottomSheetItem(
-              icon: Icons.grade_outlined,
-              label: 'Results',
-              onTap: () => _comingSoon(context, 'Results'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  static void _showTeacherMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _BottomSheetItem(
-              icon: Icons.chat_bubble_outline,
-              label: 'Messages',
-              onTap: () => _comingSoon(context, 'Messages'),
-            ),
-            _BottomSheetItem(
               icon: Icons.schedule_outlined,
               label: 'Schedule',
-              onTap: () => _comingSoon(context, 'Schedule'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/student/schedule');
+              },
             ),
-            _BottomSheetItem(
-              icon: Icons.contact_mail_outlined,
-              label: 'Contact Teacher',
-              onTap: () => _comingSoon(context, 'Contact Teacher'),
-            ),
+            // Results temporarily removed
           ],
         ),
       ),
     );
   }
 
-  static void _comingSoon(BuildContext context, String feature) {
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature coming soon')), 
-    );
-  }
+  // Teacher section temporarily removed
+
+  // Coming soon helper not needed currently
 }
 
 class _DashboardCard extends StatelessWidget {

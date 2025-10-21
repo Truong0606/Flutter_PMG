@@ -38,7 +38,7 @@ class TeacherClassDetailPage extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  color.withOpacity(0.7),
+                  color.withValues(alpha: 0.7),
                   color,
                 ],
                 begin: Alignment.topLeft,
@@ -47,7 +47,7 @@ class TeacherClassDetailPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.2),
+                  color: color.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -100,7 +100,7 @@ class TeacherClassDetailPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -131,7 +131,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF3498DB).withOpacity(0.3),
+                    color: const Color(0xFF3498DB).withValues(alpha: 0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -146,7 +146,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                       width: 200,
                       height: 200,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(100),
                       ),
                     ),
@@ -158,7 +158,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                       width: 140,
                       height: 140,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(70),
                       ),
                     ),
@@ -174,7 +174,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withValues(alpha: 0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -196,7 +196,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF3498DB).withOpacity(0.3),
+                                      color: const Color(0xFF3498DB).withValues(alpha: 0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     ),
@@ -234,8 +234,8 @@ class TeacherClassDetailPage extends StatelessWidget {
                                                 ? const Color(0xFF27AE60)
                                                 : const Color(0xFFE74C3C),
                                             classInfo.status.toLowerCase() == 'active'
-                                                ? const Color(0xFF27AE60).withOpacity(0.7)
-                                                : const Color(0xFFE74C3C).withOpacity(0.7),
+                                                ? const Color(0xFF27AE60).withValues(alpha: 0.7)
+                                                : const Color(0xFFE74C3C).withValues(alpha: 0.7),
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(20),
@@ -244,7 +244,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                                             color: (classInfo.status.toLowerCase() == 'active'
                                                     ? const Color(0xFF27AE60)
                                                     : const Color(0xFFE74C3C))
-                                                .withOpacity(0.2),
+                                                .withValues(alpha: 0.2),
                                             blurRadius: 4,
                                             offset: const Offset(0, 2),
                                           ),
@@ -283,7 +283,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -305,7 +305,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF3498DB).withOpacity(0.2),
+                              color: const Color(0xFF3498DB).withValues(alpha: 0.2),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -374,7 +374,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF3498DB).withOpacity(0.2),
+                              color: const Color(0xFF3498DB).withValues(alpha: 0.2),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -406,7 +406,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 15,
                             offset: const Offset(0, 5),
                           ),
@@ -447,7 +447,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -483,7 +483,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: const Color(0xFF3498DB).withOpacity(0.3),
+                                            color: const Color(0xFF3498DB).withValues(alpha: 0.3),
                                             blurRadius: 8,
                                             offset: const Offset(0, 4),
                                           ),
@@ -524,8 +524,8 @@ class TeacherClassDetailPage extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
-                                            const Color(0xFF3498DB).withOpacity(0.1),
-                                            const Color(0xFF2980B9).withOpacity(0.1),
+                                            const Color(0xFF3498DB).withValues(alpha: 0.1),
+                                            const Color(0xFF2980B9).withValues(alpha: 0.1),
                                           ],
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,

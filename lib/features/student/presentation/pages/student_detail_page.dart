@@ -22,7 +22,8 @@ class StudentDetailPage extends StatelessWidget {
             tooltip: 'Edit',
             onPressed: () async {
               final updated = await Navigator.pushNamed(context, '/student/edit', arguments: s);
-              if (updated == true && context.mounted) {
+              if (!context.mounted) return;
+              if (updated == true) {
                 Navigator.pop(context, true);
               }
             },
@@ -42,21 +43,20 @@ class StudentDetailPage extends StatelessWidget {
                   ],
                 ),
               );
+              if (!context.mounted) return;
               if (confirm == true) {
                 try {
                   await context.read<StudentBloc>().repository.deleteStudent(s.id);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Child deleted')),
-                    );
-                    Navigator.pop(context, true);
-                  }
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Child deleted')),
+                  );
+                  Navigator.pop(context, true);
                 } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Delete failed: $e')),
-                    );
-                  }
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Delete failed: $e')),
+                  );
                 }
               }
             },

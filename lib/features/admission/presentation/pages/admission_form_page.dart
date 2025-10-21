@@ -17,7 +17,11 @@ class AdmissionFormPage extends StatelessWidget {
           if (state is AdmissionError) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
           } else if (state is AdmissionSubmitSuccess) {
-            await showDialog(
+            if (!context.mounted) return;
+            // Capture Navigator before awaiting to avoid using BuildContext across async gaps
+            final navigator = Navigator.of(context);
+            // Don't await the dialog to avoid an async gap involving this BuildContext
+            showDialog(
               context: context,
               builder: (ctx) => AlertDialog(
                 title: const Text('Admission Submitted'),
@@ -30,7 +34,8 @@ class AdmissionFormPage extends StatelessWidget {
                   FilledButton(
                     onPressed: () {
                       Navigator.pop(ctx);
-                      Navigator.pushReplacementNamed(context, '/admission/forms');
+                      // Use captured NavigatorState to avoid referencing context after await
+                      navigator.pushReplacementNamed('/admission/forms');
                     },
                     child: const Text('View All Forms'),
                   ),
@@ -172,12 +177,15 @@ class _FormContentState extends State<_FormContent> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () async {
+                  // Capture messenger before await to avoid context-after-await
+                  final messenger = ScaffoldMessenger.of(context);
                   // Navigate to student list; pick one and return it
                   final picked = await Navigator.pushNamed(
                     context,
                     '/student/list',
                     arguments: {'pickMode': true},
                   );
+                  if (!mounted) return;
                   // If your student list can't return a selection, we can add a dedicated picker later.
                   if (picked is student_domain.Student) {
                     setState(() {
@@ -185,8 +193,9 @@ class _FormContentState extends State<_FormContent> {
                     });
                     // Initial check will be performed after user chooses an active class
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please select a child from the list')), 
+                    // Use messenger captured before await
+                    messenger.showSnackBar(
+                      const SnackBar(content: Text('Please select a child from the list')),
                     );
                   }
                 },
@@ -204,22 +213,23 @@ class _FormContentState extends State<_FormContent> {
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (_, i) {
                 final c = term.classes[i];
-                return RadioListTile<int>(
-                  value: c.id,
-                  groupValue: _selectedClassId,
-                  onChanged: (v) {
+                final selected = _selectedClassId == c.id;
+                return ListTile(
+                  leading: Icon(
+                    selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                    color: selected ? Theme.of(context).colorScheme.primary : Colors.grey,
+                  ),
+                  title: Text(c.name),
+                  subtitle: Text('${c.academicYear} • ${c.numberOfWeeks} weeks • ${_fmtDate(c.startDate)} • Cost: ${c.cost}'),
+                  onTap: () {
                     if (_studentId == 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please select a child first')),
                       );
                       return;
                     }
-                    setState(() {
-                      _selectedClassId = v;
-                    });
+                    setState(() => _selectedClassId = c.id);
                   },
-                  title: Text(c.name),
-                  subtitle: Text('${c.academicYear} • ${c.numberOfWeeks} weeks • ${_fmtDate(c.startDate)} • Cost: ${c.cost}')
                 );
               },
             ),
@@ -469,22 +479,23 @@ class _SelectClassesSheet extends StatelessWidget {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.save_alt),
                   label: const Text('Submit Admission Form'),
-                  onPressed: () async {
+                  onPressed: () {
                     final bloc = context.read<AdmissionBloc>();
                     final st = bloc.state;
                     if (st is! AdmissionLoaded) return;
                     if (st.selectedForForm.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select at least one class')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please select at least one class')),
+                      );
                       return;
                     }
-                    // Submit
-                    try {
-                      await Future.microtask(() => bloc.add(SubmitAdmissionForm()));
-                      if (context.mounted) {
-                        Navigator.pop(context); // close sheet
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Admission form submitted')));
-                      }
-                    } catch (_) {}
+                    // Submit without creating an async gap; then close sheet and notify
+                    bloc.add(SubmitAdmissionForm());
+                    final messenger = ScaffoldMessenger.of(context);
+                    Navigator.pop(context); // close sheet
+                    messenger.showSnackBar(
+                      const SnackBar(content: Text('Admission form submitted')),
+                    );
                   },
                 ),
               )

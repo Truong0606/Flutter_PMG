@@ -46,34 +46,64 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
 
-      if (response.statusCode == 200 && data['token'] != null) {
-        final token = data['token'];
-        
+      // New response shape: { isSuccess, message, data: { token, role }, ... }
+      final bool isSuccess = data['isSuccess'] == true || data['success'] == true;
+      final dynamic dataNode = data['data'];
+      String? token;
+      String? roleFromApi;
+      if (dataNode is Map<String, dynamic>) {
+        token = dataNode['token']?.toString();
+        roleFromApi = dataNode['role']?.toString();
+      } else {
+        // Fallback for old shape
+        token = data['token']?.toString();
+        roleFromApi = data['role']?.toString();
+      }
+
+      if (response.statusCode == 200 && token != null && token.isNotEmpty) {
         // Decode JWT token to get user info
         final jwt = JWT.decode(token);
         final payload = jwt.payload as Map<String, dynamic>;
-        
+
+        // Robust exp parsing (seconds since epoch)
+        DateTime? tokenExpiry;
+        final exp = payload['exp'];
+        if (exp != null) {
+          final intExp = exp is int ? exp : int.tryParse(exp.toString());
+          if (intExp != null) {
+            tokenExpiry = DateTime.fromMillisecondsSinceEpoch(intExp * 1000);
+          }
+        }
+
+        final roleClaim = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']?.toString();
+        final role = roleClaim ?? payload['role']?.toString() ?? roleFromApi ?? '';
+        final name = payload['unique_name']?.toString() ?? payload['name']?.toString() ?? data['name']?.toString() ?? '';
+        final id = payload['id']?.toString() ?? payload['sub']?.toString() ?? '';
+
         // Create user object
         final user = User(
-          id: payload['sub'] ?? '',
-          email: payload['email'] ?? email,
-          name: data['name'] ?? '',
-          role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? data['role'] ?? '',
+          id: id,
+          email: payload['email']?.toString() ?? email,
+          name: name,
+          role: role,
           token: token,
-          tokenExpiry: payload['exp'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(payload['exp'] * 1000)
-              : null,
+          tokenExpiry: tokenExpiry,
         );
 
         // Save to local storage
         await _storageService.saveToken(token);
         await _storageService.saveUser(user);
 
-        return AuthResult.success(user, token);
+        return AuthResult.success(user, token, message: data['message']?.toString());
+      }
+
+      // If API says success but token missing, surface clear message
+      if (response.statusCode == 200 && isSuccess && (token == null || token.isEmpty)) {
+        return AuthResult.failure('Login succeeded but token missing in response', response.statusCode);
       }
 
       return AuthResult.failure(
-        data['message'] ?? 'Login failed',
+        data['message']?.toString() ?? 'Login failed',
         response.statusCode,
       );
     } catch (e) {

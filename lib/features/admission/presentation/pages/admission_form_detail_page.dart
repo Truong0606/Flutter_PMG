@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../domain/entities/admission_form_item.dart';
 import '../bloc/admission_bloc.dart';
 
-class AdmissionFormDetailPage extends StatelessWidget {
+class AdmissionFormDetailPage extends StatefulWidget {
   const AdmissionFormDetailPage({super.key});
+
+  @override
+  State<AdmissionFormDetailPage> createState() => _AdmissionFormDetailPageState();
+}
+
+class _AdmissionFormDetailPageState extends State<AdmissionFormDetailPage> {
+  AdmissionFormItem? _item;
+  bool _refreshing = false;
 
   String _fmtDate(String? s) {
     if (s == null || s.isEmpty) return '-';
@@ -20,23 +27,56 @@ class AdmissionFormDetailPage extends StatelessWidget {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_item == null) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is AdmissionFormItem) {
+        _item = args;
+      }
+    }
+  }
+
+  Future<void> _refreshForm() async {
+    if (_item == null) return;
+    try {
+      setState(() => _refreshing = true);
+      final bloc = context.read<AdmissionBloc>();
+      final list = await bloc.repository.listAdmissionForms();
+      final updated = list.where((e) => e.id == _item!.id).cast<AdmissionFormItem?>().firstWhere(
+            (e) => e != null,
+            orElse: () => _item,
+          );
+      if (!mounted) return;
+      setState(() {
+        _item = updated ?? _item;
+        _refreshing = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _refreshing = false);
+    }
+  }
+
   Future<void> _openPayment(BuildContext context, int id) async {
     final repo = context.read<AdmissionBloc>().repository;
     try {
       final urlStr = await repo.getAdmissionPaymentUrl(id);
-      final uri = Uri.parse(urlStr);
-      // Try default external application; some emulators work better with nonBrowserApplication
-      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication)
-          || await launchUrl(uri, mode: LaunchMode.externalNonBrowserApplication)
-          || await launchUrl(uri);
-      if (!launched) {
-        // Fallback to in-app WebView
-        if (context.mounted) {
-          await Navigator.push(context, MaterialPageRoute(
-            builder: (_) => _PaymentWebView(url: urlStr),
-          ));
-        }
+      // Always use in-app WebView so we can intercept the callback and return to app
+      if (!context.mounted) return;
+      final result = await Navigator.push(context, MaterialPageRoute(
+        builder: (_) => _PaymentWebView(url: urlStr),
+      ));
+      // After awaiting navigation, re-check mounted before using context
+      if (!context.mounted) return;
+      if (result is Map && result['message'] != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'].toString())),
+        );
       }
+      // Refresh the form to reflect latest status immediately
+      await _refreshForm();
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -48,8 +88,7 @@ class AdmissionFormDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    final it = (args is AdmissionFormItem) ? args : null;
+    final it = _item;
 
     return Scaffold(
       appBar: AppBar(title: Text(it == null ? 'Admission Form' : 'Form #${it.id}')),
@@ -58,6 +97,7 @@ class AdmissionFormDetailPage extends StatelessWidget {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                if (_refreshing) const LinearProgressIndicator(minHeight: 2),
                 ListTile(
                   leading: CircleAvatar(backgroundColor: Colors.blue.shade50, child: const Icon(Icons.assignment_outlined, color: Colors.blue)),
                   title: Text('Status: ${it.status}'),
@@ -133,8 +173,46 @@ class _PaymentWebViewState extends State<_PaymentWebView> {
       ..setNavigationDelegate(NavigationDelegate(
         onPageStarted: (_) => setState(() => _loading = true),
         onPageFinished: (_) => setState(() => _loading = false),
+        onNavigationRequest: (request) {
+          final uri = Uri.parse(request.url);
+          // Detect callback URL (e.g., https://localhost:5001/Home/PaymentCallback?...vnp_*)
+          final isPaymentCallback =
+              uri.path.toLowerCase().contains('/home/paymentcallback') ||
+              uri.queryParameters.keys.any((k) => k.toLowerCase().startsWith('vnp_'));
+
+          if (isPaymentCallback) {
+            // Collect vnp_ params only
+            final qp = <String, String>{};
+            uri.queryParameters.forEach((key, value) {
+              if (key.toLowerCase().startsWith('vnp_')) {
+                qp[key] = value;
+              }
+            });
+
+            // Confirm with backend
+            _confirmAndClose(qp);
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
       ))
       ..loadRequest(Uri.parse(widget.url));
+  }
+
+  Future<void> _confirmAndClose(Map<String, String> qp) async {
+    try {
+      // using State.context; guarded with mounted checks after awaits
+      final repo = context.read<AdmissionBloc>().repository;
+      final res = await repo.confirmAdmissionPayment(qp);
+      final message = (res['message']?.toString() ?? 'Payment result received');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      Navigator.of(context).pop(res);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Confirm payment failed: $e')));
+      Navigator.of(context).pop();
+    }
   }
 
   @override

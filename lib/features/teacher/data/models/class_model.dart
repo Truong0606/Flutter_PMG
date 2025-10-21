@@ -1,5 +1,6 @@
 import 'package:first_app/features/teacher/data/models/teacher_model.dart';
 import 'package:first_app/features/teacher/data/models/schedule_model.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/classes.dart';
 
 class ClassModel extends Classes {
@@ -30,7 +31,7 @@ class ClassModel extends Classes {
             schedulesList.add(ScheduleModel.fromJson(scheduleJson));
           } catch (e) {
             // Skip invalid schedule entries
-            print('Error parsing schedule: $e');
+            debugPrint('Error parsing schedule: $e');
           }
         }
       }

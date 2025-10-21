@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/schedule.dart';
 import 'activity_model.dart';
 import 'class_model.dart';
@@ -22,7 +23,7 @@ class ScheduleModel extends Schedule {
             try {
               activities.add(ActivityModel.fromJson(activity));
             } catch (e) {
-              print('Error parsing activity: $e\nActivity data: $activity');
+              debugPrint('Error parsing activity: $e\nActivity data: $activity');
             }
           }
         }
@@ -35,7 +36,7 @@ class ScheduleModel extends Schedule {
         try {
           classModel = ClassModel.fromJson(classesData, parseSchedules: false);
         } catch (e) {
-          print('Error parsing class: $e\nClass data: $classesData');
+          debugPrint('Error parsing class: $e\nClass data: $classesData');
         }
       }
 

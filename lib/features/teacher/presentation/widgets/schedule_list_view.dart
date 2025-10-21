@@ -99,7 +99,7 @@ class ScheduleListView extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: dayColors[day]?.withOpacity(0.1) ?? Colors.grey[100],
+                        color: dayColors[day]?.withValues(alpha: 0.1) ?? Colors.grey[100],
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                       ),
                       child: Row(

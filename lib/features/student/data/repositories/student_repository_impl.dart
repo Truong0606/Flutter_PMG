@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/network/api_client.dart';
 import '../../domain/entities/student.dart';
 import '../../domain/repositories/student_repository.dart';
+import '../../domain/entities/activity_item.dart';
 
 class StudentRepositoryImpl implements StudentRepository {
   final ApiClient _apiClient;
@@ -186,5 +187,29 @@ class StudentRepositoryImpl implements StudentRepository {
       }
     }
     throw Exception(serverMsg);
+  }
+
+  @override
+  Future<List<ActivityItem>> getActivities({
+    required int studentId,
+    required String startWeek,
+    required String endWeek,
+  }) async {
+    final query = '?studentId=$studentId';
+    final body = {
+      'startWeek': startWeek,
+      'endWeek': endWeek,
+    };
+    final resp = await _apiClient.putParent('/student/activity/list$query', body: body);
+    if (resp.statusCode >= 200 && resp.statusCode < 300) {
+      if (resp.body.isEmpty) return [];
+      final map = jsonDecode(resp.body);
+      final list = (map is Map && map['data'] is List) ? map['data'] as List : const [];
+      return list
+          .whereType<Map<String, dynamic>>()
+          .map(ActivityItem.fromJson)
+          .toList();
+    }
+    throw Exception('Failed to load activities (${resp.statusCode})');
   }
 }

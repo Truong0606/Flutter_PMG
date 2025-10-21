@@ -61,7 +61,7 @@ class _TeacherWeeklySchedulePageState extends State<TeacherWeeklySchedulePage> {
           ),
           backgroundColor: Colors.white,
           elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: Colors.black.withValues(alpha: 0.1),
           iconTheme: const IconThemeData(color: Color(0xFF2C3E50)),
         ),
         body: BlocBuilder<TeacherBloc, TeacherState>(
@@ -81,7 +81,7 @@ class _TeacherWeeklySchedulePageState extends State<TeacherWeeklySchedulePage> {
                     border: Border.all(color: Colors.grey[200]!, width: 1),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -253,7 +253,7 @@ class _TeacherWeeklySchedulePageState extends State<TeacherWeeklySchedulePage> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF3498DB).withOpacity(0.1),
+              color: const Color(0xFF3498DB).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -307,7 +307,7 @@ class _TeacherWeeklySchedulePageState extends State<TeacherWeeklySchedulePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF3498DB).withOpacity(0.1),
+                    color: const Color(0xFF3498DB).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -348,7 +348,7 @@ class _TeacherWeeklySchedulePageState extends State<TeacherWeeklySchedulePage> {
         border: Border.all(color: Colors.grey[200]!, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -361,7 +361,7 @@ class _TeacherWeeklySchedulePageState extends State<TeacherWeeklySchedulePage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _getDayColor(day).withOpacity(0.1),
+              color: _getDayColor(day).withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -496,7 +496,7 @@ class _TeacherWeeklySchedulePageState extends State<TeacherWeeklySchedulePage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFF27AE60).withOpacity(0.1),
+              color: const Color(0xFF27AE60).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Text(

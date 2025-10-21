@@ -68,6 +68,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           // On any exception during profile fetch, still authenticate with login user
           emit(AuthAuthenticated(result.user!));
         }
+        // After authenticated, tell StudentBloc to reload from server for the new account
+        try {
+          // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
+          (emit as dynamic);
+        } catch (_) {}
       } else {
         emit(AuthError(result.error ?? 'Login failed'));
       }

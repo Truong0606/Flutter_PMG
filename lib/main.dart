@@ -23,6 +23,7 @@ import 'features/student/presentation/pages/student_list_page.dart';
 import 'features/student/presentation/pages/student_create_page.dart';
 import 'features/student/presentation/pages/student_detail_page.dart';
 import 'features/student/presentation/pages/student_edit_page.dart';
+import 'features/student/presentation/pages/student_schedule_page.dart';
 import 'features/admission/data/repositories/admission_repository_impl.dart';
 import 'features/admission/presentation/bloc/admission_bloc.dart';
 import 'features/admission/presentation/pages/admission_form_page.dart';
@@ -58,7 +59,18 @@ class MyApp extends StatelessWidget {
           create: (context) => AdmissionBloc(admissionRepository),
         ),
       ],
-      child: MaterialApp(
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthUnauthenticated || state is AuthAuthenticated) {
+                // Clear cached student list whenever auth account changes
+                context.read<StudentBloc>().add(ClearStudents());
+              }
+            },
+          ),
+        ],
+        child: MaterialApp(
         title: 'MerryStar Kindergarten',
         theme: ThemeData(
           useMaterial3: true,
@@ -84,6 +96,7 @@ class MyApp extends StatelessWidget {
           '/student/create': (context) => const StudentCreatePage(),
           '/student/detail': (context) => const StudentDetailPage(),
           '/student/edit': (context) => const StudentEditPage(),
+          '/student/schedule': (context) => const StudentSchedulePage(),
           '/hr/dashboard': (context) => const HomePage(), // Placeholder
           '/education/dashboard': (context) => const HomePage(), // Placeholder
           '/admission/forms': (context) => const AdmissionFormListPage(),
@@ -100,6 +113,7 @@ class MyApp extends StatelessWidget {
           }
           return null;
         },
+        ),
       ),
     );
   }

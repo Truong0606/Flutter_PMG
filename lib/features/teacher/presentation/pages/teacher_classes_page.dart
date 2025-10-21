@@ -156,7 +156,7 @@ class TeacherClassesPage extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
-          print('Navigating to class detail: ${classInfo.name}');
+          debugPrint('Navigating to class detail: ${classInfo.name}');
           Navigator.push(
             context,
             MaterialPageRoute(

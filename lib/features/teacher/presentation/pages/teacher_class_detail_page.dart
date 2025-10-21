@@ -80,7 +80,7 @@ class TeacherClassDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Building TeacherClassDetailPage for: ${classInfo.name}');
+  debugPrint('Building TeacherClassDetailPage for: ${classInfo.name}');
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       extendBodyBehindAppBar: true,
@@ -90,9 +90,9 @@ class TeacherClassDetailPage extends StatelessWidget {
         leading: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
           ),
           child: IconButton(
             icon: const Icon(
@@ -106,10 +106,10 @@ class TeacherClassDetailPage extends StatelessWidget {
           Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -119,7 +119,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                 color: Color(0xFF2C3E50),
               ),
               onPressed: () {
-                // TODO: Add more options
+                // Placeholder: actions menu can be expanded here.
               },
             ),
           ),
@@ -149,7 +149,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -167,7 +167,7 @@ class TeacherClassDetailPage extends StatelessWidget {
                                 'Class Information',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -195,13 +195,13 @@ class TeacherClassDetailPage extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: classInfo.status.toLowerCase() == 'active'
-                            ? Colors.green.withOpacity(0.2)
-                            : Colors.red.withOpacity(0.2),
+                            ? Colors.green.withValues(alpha: 0.2)
+                            : Colors.red.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: classInfo.status.toLowerCase() == 'active'
-                              ? Colors.green.withOpacity(0.3)
-                              : Colors.red.withOpacity(0.3),
+                              ? Colors.green.withValues(alpha: 0.3)
+                              : Colors.red.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),

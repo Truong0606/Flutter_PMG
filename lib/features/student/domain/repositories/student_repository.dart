@@ -1,4 +1,5 @@
 import '../entities/student.dart';
+import '../entities/activity_item.dart';
 
 abstract class StudentRepository {
   Future<List<Student>> getStudents();
@@ -23,5 +24,12 @@ abstract class StudentRepository {
     String? profileImage,
     String? householdRegistrationImg,
     String? birthCertificateImg,
+  });
+
+  // Schedule/Activities between two dates (yyyy-MM-dd)
+  Future<List<ActivityItem>> getActivities({
+    required int studentId,
+    required String startWeek,
+    required String endWeek,
   });
 }

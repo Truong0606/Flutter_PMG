@@ -38,6 +38,11 @@ abstract class AdmissionRepository {
   // GET /api/admissionForm/paymentUrl/{id} (parent-api)
   Future<String> getAdmissionPaymentUrl(int id);
 
+  // GET /api/admissionForm/paymentUrl/confirm (parent-api)
+  // Query parameters include VNPAY callback values (vnp_*)
+  // Returns backend response map for further handling/showing message
+  Future<Map<String, dynamic>> confirmAdmissionPayment(Map<String, String> queryParams);
+
   // Optional: GET /api/admissionForm/{id} if available; otherwise we use list data passed in
   // Future<AdmissionFormItem> getAdmissionForm(int id);
 }

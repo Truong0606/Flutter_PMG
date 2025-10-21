@@ -19,7 +19,7 @@ class TeacherSchedulePage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.1),
+          shadowColor: Colors.black.withValues(alpha: 0.1),
           title: const Text(
             'My Schedules',
             style: TextStyle(
@@ -166,7 +166,7 @@ class TeacherSchedulePage extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF3498DB).withOpacity(0.1),
+                    color: const Color(0xFF3498DB).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -207,7 +207,7 @@ class TeacherSchedulePage extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF27AE60).withOpacity(0.1),
+                    color: const Color(0xFF27AE60).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
