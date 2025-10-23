@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/admission_term.dart';
 import '../../domain/repositories/admission_repository.dart';
+import '../../domain/errors.dart';
 
 // Events
 abstract class AdmissionEvent {}
@@ -80,7 +81,11 @@ class AdmissionBloc extends Bloc<AdmissionEvent, AdmissionState> {
         final term = await repository.getActiveTerm();
         emit(AdmissionLoaded(term: term));
       } catch (e) {
-        emit(AdmissionError(e.toString()));
+        if (e is AdmissionNotAvailableException) {
+          emit(AdmissionError(e.toString()));
+        } else {
+          emit(AdmissionError(e.toString()));
+        }
       }
     });
 

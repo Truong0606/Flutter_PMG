@@ -5,6 +5,7 @@ import '../../features/authentication/domain/entities/user.dart';
 class StorageService {
   static const String _tokenKey = 'token';
   static const String _userKey = 'user';
+  static const String _guestChatKey = 'guest_ai_chat_history';
 
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -55,5 +56,35 @@ class StorageService {
     }
     
     return true;
+  }
+
+  // ===== Guest AI chat history =====
+  Future<void> saveGuestChatHistory(List<Map<String, dynamic>> messages) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_guestChatKey, jsonEncode(messages));
+  }
+
+  Future<List<Map<String, dynamic>>> getGuestChatHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonStr = prefs.getString(_guestChatKey);
+    if (jsonStr == null || jsonStr.isEmpty) return <Map<String, dynamic>>[];
+    try {
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is List) {
+        return decoded
+            .whereType<Map<String, dynamic>>()
+            .map((e) => {
+                  'role': (e['role'] ?? '').toString(),
+                  'text': (e['text'] ?? '').toString(),
+                })
+            .toList();
+      }
+    } catch (_) {}
+    return <Map<String, dynamic>>[];
+  }
+
+  Future<void> clearGuestChatHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_guestChatKey);
   }
 }

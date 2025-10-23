@@ -1,5 +1,6 @@
 import 'dart:convert';
 import '../../../../core/network/api_client.dart';
+import '../../domain/errors.dart';
 import '../../domain/entities/admission_term.dart';
 import '../../domain/repositories/admission_repository.dart';
 import '../../domain/entities/admission_form_item.dart';
@@ -11,6 +12,10 @@ class AdmissionRepositoryImpl implements AdmissionRepository {
   @override
   Future<AdmissionTerm> getActiveTerm() async {
     final resp = await _api.getClassPublic('/term/active');
+    if (resp.statusCode == 404) {
+      // Map 404 to a domain-specific exception so UI can show a friendly message
+      throw AdmissionNotAvailableException();
+    }
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
       final map = resp.body.isNotEmpty ? jsonDecode(resp.body) : {};
       final data = (map is Map && map['data'] is Map<String, dynamic>)

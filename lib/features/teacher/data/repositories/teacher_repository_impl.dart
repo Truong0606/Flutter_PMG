@@ -11,12 +11,32 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
 
   TeacherActionRepositoryImpl(this._apiClient);
 
+  /// Some APIs return a list at the root, others wrap it inside a map
+  /// like {"data": [...] } or {"items": [...] }. This helper extracts
+  /// the first list it can find from a decoded JSON value.
+  List<dynamic> _extractList(dynamic decoded) {
+    if (decoded is List) return decoded;
+    if (decoded is Map<String, dynamic>) {
+      // Common wrapper keys
+      for (final key in const ['data', 'items', 'result', 'results', 'content']) {
+        final v = decoded[key];
+        if (v is List) return v;
+      }
+      // Fall back: first list value in the map, if any
+      for (final v in decoded.values) {
+        if (v is List) return v;
+      }
+    }
+    return <dynamic>[];
+  }
+
   @override
   Future<List<Classes>> getClassList() async {
     final resp = await _apiClient.get('/teacher/classes');
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
       if (resp.body.isEmpty) return [];
-      final data = jsonDecode(resp.body) as List;
+      final decoded = jsonDecode(resp.body);
+      final data = _extractList(decoded);
       return data
           .map((e) => ClassModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -32,7 +52,8 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
       final resp = await _apiClient.get('/teacher/schedules');
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
         if (resp.body.isEmpty) return [];
-        final List<dynamic> jsonData = jsonDecode(resp.body);
+        final decoded = jsonDecode(resp.body);
+        final List<dynamic> jsonData = _extractList(decoded);
         final schedules = jsonData
             .map((item) {
               if (item is! Map<String, dynamic>) return null;
@@ -70,7 +91,8 @@ class TeacherActionRepositoryImpl implements TeacherActionRepository {
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
         if (resp.body.isEmpty) return [];
 
-        final List<dynamic> jsonData = jsonDecode(resp.body);
+        final decoded = jsonDecode(resp.body);
+        final List<dynamic> jsonData = _extractList(decoded);
 
         final schedules = jsonData
             .map((item) {

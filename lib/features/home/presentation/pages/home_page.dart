@@ -5,9 +5,17 @@ import '../widgets/intro_tabs_section.dart';
 import '../widgets/user_account_dropdown.dart';
 import '../../../authentication/presentation/bloc/auth_bloc.dart';
 import '../../../authentication/presentation/bloc/auth_event_state.dart';
+import '../../../ai_chat/presentation/widgets/guest_ai_chat_box.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool _showChat = false;
 
   @override
   Widget build(BuildContext context) {
@@ -203,16 +211,35 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Hero Section with blue gradient background
-              const HeroSection(),
-              // Introduction/About Us tabs section
-              const IntroTabsSection(),
-            ],
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: const [
+                // Hero Section with blue gradient background
+                HeroSection(),
+                // Introduction/About Us tabs section
+                IntroTabsSection(),
+              ],
+            ),
           ),
-        ),
+          Positioned(
+            right: 12,
+            bottom: 84,
+            child: Offstage(
+              // Hide visually but keep state alive
+              offstage: !_showChat,
+              child: const GuestAiChatBox(),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => setState(() => _showChat = !_showChat),
+        backgroundColor: const Color(0xFF3498DB),
+        icon: Icon(_showChat ? Icons.close : Icons.smart_toy),
+        label: Text(_showChat ? 'Close AI' : 'Ask AI'),
+      ),
     );
   }
 }
