@@ -21,7 +21,12 @@ class AdmissionRepositoryImpl implements AdmissionRepository {
       final data = (map is Map && map['data'] is Map<String, dynamic>)
           ? map['data'] as Map<String, dynamic>
           : <String, dynamic>{};
-      return AdmissionTerm.fromJson(data);
+      final term = AdmissionTerm.fromJson(data);
+      // If API returns 200 with no active term/classes, surface as not available
+      if (term.id == 0 || term.numberOfClasses == 0 || term.classes.isEmpty) {
+        throw const AdmissionNotAvailableException();
+      }
+      return term;
     }
     throw Exception('Failed to get active term (${resp.statusCode})');
   }

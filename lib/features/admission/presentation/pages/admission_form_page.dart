@@ -99,6 +99,35 @@ class AdmissionFormPage extends StatelessWidget {
             );
           }
           if (state is AdmissionLoaded) {
+            // If term is present but there are no active classes, show a friendly message
+            if (state.term.classes.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.event_busy, size: 56, color: Colors.orange),
+                    const SizedBox(height: 12),
+                    Text('Admissions are not available right now',
+                        style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+                    const SizedBox(height: 8),
+                    const Text('Please check back later or contact the school for the next admission term.',
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: OutlinedButton.icon(
+                        onPressed: () => context.read<AdmissionBloc>().add(LoadActiveTerm()),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Refresh'),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
             return _FormContent(state: state, initialStudent: initialStudent);
           }
           return const SizedBox.shrink();
