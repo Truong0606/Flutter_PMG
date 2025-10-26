@@ -1,0 +1,64 @@
+@startuml
+' PlantUML package diagram for Flutter mobile app
+' Render online: https://www.plantuml.com/plantuml
+
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+
+package "Flutter Mobile App" {
+  package core {
+    [app_config.dart] as CFG
+    [api_client.dart] as NET
+    [storage_service.dart] as SVC
+  }
+  package config {
+    [di.dart] as DI
+  }
+  package features {
+    package authentication {
+      [data] as AUTH_D
+      [domain] as AUTH_DO
+      [presentation] as AUTH_P
+    }
+    package student {
+      [data] as STU_D
+      [domain] as STU_DO
+      [presentation] as STU_P
+    }
+    package admission {
+      [data] as ADM_D
+      [domain] as ADM_DO
+      [presentation] as ADM_P
+    }
+    package others <<profile/teacher/parent/hr>> {
+      [presentation] as O_P
+    }
+  }
+  package platform {
+    [android]
+    [ios]
+  }
+  [assets/images] as ASSETS
+}
+
+' Dependencies (imports)
+AUTH_P --> AUTH_DO
+AUTH_DO --> AUTH_D
+AUTH_D --> NET
+AUTH_D --> SVC
+
+STU_P --> STU_DO
+STU_DO --> STU_D
+STU_D --> NET
+
+ADM_P --> ADM_DO
+ADM_DO --> ADM_D
+ADM_D --> NET
+
+features --> core
+features --> config
+config --> core
+
+ASSETS ..> features : uses
+
+@enduml

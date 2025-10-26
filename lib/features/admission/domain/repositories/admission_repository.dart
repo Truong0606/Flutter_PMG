@@ -45,4 +45,7 @@ abstract class AdmissionRepository {
 
   // Optional: GET /api/admissionForm/{id} if available; otherwise we use list data passed in
   // Future<AdmissionFormItem> getAdmissionForm(int id);
+
+  // DELETE /api/admissionForm?afId={id} (parent-api)
+  Future<void> deleteAdmissionForm(int id);
 }

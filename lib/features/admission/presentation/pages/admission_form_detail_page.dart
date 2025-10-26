@@ -48,7 +48,7 @@ class _AdmissionFormDetailPageState extends State<AdmissionFormDetailPage> {
             (e) => e != null,
             orElse: () => _item,
           );
-      if (!mounted) return;
+  if (!context.mounted) return;
       setState(() {
         _item = updated ?? _item;
         _refreshing = false;
@@ -63,13 +63,13 @@ class _AdmissionFormDetailPageState extends State<AdmissionFormDetailPage> {
     final repo = context.read<AdmissionBloc>().repository;
     try {
       final urlStr = await repo.getAdmissionPaymentUrl(id);
-      // Always use in-app WebView so we can intercept the callback and return to app
-      if (!context.mounted) return;
+    // Always use in-app WebView so we can intercept the callback and return to app
+    if (!context.mounted) return;
       final result = await Navigator.push(context, MaterialPageRoute(
         builder: (_) => _PaymentWebView(url: urlStr),
       ));
-      // After awaiting navigation, re-check mounted before using context
-      if (!context.mounted) return;
+    // After awaiting navigation, re-check mounted before using context
+    if (!context.mounted) return;
       if (result is Map && result['message'] != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'].toString())),
@@ -115,9 +115,7 @@ class _AdmissionFormDetailPageState extends State<AdmissionFormDetailPage> {
                   _kv('Place of Birth', (it.student!['placeOfBirth'] ?? '-').toString()),
                 ],
                 const SizedBox(height: 8),
-                Text('Term', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 4),
-                _kv('Term ID', it.admissionTermId.toString()),
+                // Hide Term header and Term ID per requirement; keep dates only
                 _kv('Start', _fmtDate(it.admissionTermStartDate)),
                 _kv('End', _fmtDate(it.admissionTermEndDate)),
                 const SizedBox(height: 8),

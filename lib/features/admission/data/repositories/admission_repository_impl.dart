@@ -114,4 +114,15 @@ class AdmissionRepositoryImpl implements AdmissionRepository {
     }
     throw Exception('Failed to confirm payment (${resp.statusCode})');
   }
+
+  @override
+  Future<void> deleteAdmissionForm(int id) async {
+    // Swagger shows DELETE /api/admissionForm with query param afId
+    final uri = Uri(path: '/admissionForm', queryParameters: {'afId': id.toString()});
+    final resp = await _api.deleteParent(uri.toString());
+    if (resp.statusCode >= 200 && resp.statusCode < 300) {
+      return;
+    }
+    throw Exception('Failed to delete admission form (${resp.statusCode})');
+  }
 }

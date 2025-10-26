@@ -1,0 +1,77 @@
+%% Mermaid package diagram for Flutter mobile app
+%% Paste into https://mermaid.live to export an image
+
+flowchart TB
+  subgraph Mobile_App[Flutter Mobile App]
+    direction TB
+
+    subgraph Core[core]
+      direction TB
+      CFG[core/config\napp_config.dart]
+      NET[core/network\napi_client.dart]
+      SVC[core/services\nstorage_service.dart]
+    end
+
+    subgraph Config[config]
+      DI[dependency_injection\n(di.dart)]
+    end
+
+    subgraph Features[features]
+      direction TB
+
+      subgraph Auth[authentication]
+        direction TB
+        AUTH_D[data/\nrepositories]
+        AUTH_DO[domain/\nentities+repositories]
+        AUTH_P[presentation/\nbloc+pages]
+      end
+
+      subgraph Student[student]
+        STU_D[data]
+        STU_DO[domain]
+        STU_P[presentation]
+      end
+
+      subgraph Admission[admission]
+        ADM_D[data]
+        ADM_DO[domain]
+        ADM_P[presentation]
+      end
+
+      subgraph Others[profile/teacher/parent/hr]
+        O_P[presentation]
+      end
+    end
+
+    subgraph Platform[platform]
+      ANDR[android/]
+      IOS[ios/]
+    end
+
+    ASSETS[assets/images/]
+  end
+
+  %% Dependencies (imports)
+  AUTH_P --> AUTH_DO
+  AUTH_DO --> AUTH_D
+  AUTH_D --> NET
+  AUTH_D --> SVC
+
+  STU_P --> STU_DO
+  STU_DO --> STU_D
+  STU_D --> NET
+
+  ADM_P --> ADM_DO
+  ADM_DO --> ADM_D
+  ADM_D --> NET
+
+  Features --> Core
+  Features --> Config
+  Config --> Core
+
+  ASSETS -.-> Features
+  ANDR -.build.-> Mobile_App
+  IOS -.build.-> Mobile_App
+
+  classDef pkg fill:#FFEFD5,stroke:#d39f6a,stroke-width:1px
+  class Core,Config,Features,Platform pkg

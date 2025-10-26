@@ -148,3 +148,24 @@ class ResetPasswordSuccess extends AuthState {
   @override
   List<Object> get props => [message];
 }
+
+// Change Password (authed)
+class ChangePasswordRequested extends AuthEvent {
+  final String currentPassword;
+  final String newPassword;
+  final String confirmPassword;
+  const ChangePasswordRequested({
+    required this.currentPassword,
+    required this.newPassword,
+    required this.confirmPassword,
+  });
+  @override
+  List<Object> get props => [currentPassword, newPassword, confirmPassword];
+}
+
+class ChangePasswordSuccess extends AuthState {
+  final String message;
+  const ChangePasswordSuccess(this.message);
+  @override
+  List<Object> get props => [message];
+}

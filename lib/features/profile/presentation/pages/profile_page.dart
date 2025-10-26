@@ -300,6 +300,31 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Change Password Button (third button)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _showChangePasswordDialog(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2C3E50),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Change Password',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     // Refresh Button
                     SizedBox(
                       width: double.infinity,
@@ -581,6 +606,108 @@ class _ProfilePageState extends State<ProfilePage> {
     
     // Wait a bit for the auth check to complete
     await Future.delayed(const Duration(milliseconds: 1000));
+  }
+
+  void _showChangePasswordDialog(BuildContext context) {
+    final currentCtrl = TextEditingController();
+    final newCtrl = TextEditingController();
+    final confirmCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Change Password', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: BlocConsumer<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is ChangePasswordSuccess) {
+                Navigator.of(dialogContext).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message), backgroundColor: Colors.green),
+                );
+              } else if (state is AuthError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                );
+              }
+            },
+            builder: (context, state) {
+              final loading = state is AuthLoading;
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: currentCtrl,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: 'Current password', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: newCtrl,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: 'New password', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: confirmCtrl,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: 'Confirm new password', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 8),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('* Minimum 6 characters recommended', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: loading
+                            ? null
+                            : () {
+                                final current = currentCtrl.text.trim();
+                                final np = newCtrl.text.trim();
+                                final cf = confirmCtrl.text.trim();
+                                if (current.isEmpty || np.isEmpty || cf.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Please fill all fields'), backgroundColor: Colors.red),
+                                  );
+                                  return;
+                                }
+                                if (np != cf) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('New password and confirm do not match'), backgroundColor: Colors.red),
+                                  );
+                                  return;
+                                }
+                                context.read<AuthBloc>().add(ChangePasswordRequested(
+                                      currentPassword: current,
+                                      newPassword: np,
+                                      confirmPassword: cf,
+                                    ));
+                              },
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6B35), foregroundColor: Colors.white),
+                        child: loading
+                            ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : const Text('Update Password'),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

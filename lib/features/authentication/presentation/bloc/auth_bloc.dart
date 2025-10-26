@@ -16,6 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<ForgotPasswordRequested>(_onForgotPasswordRequested);
     on<ResetPasswordRequested>(_onResetPasswordRequested);
+    on<ChangePasswordRequested>(_onChangePasswordRequested);
   }
 
   void _onCheckAuthStatus(CheckAuthStatus event, Emitter<AuthState> emit) async {
@@ -188,6 +189,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(ResetPasswordSuccess(result.message ?? 'Password reset successful'));
       } else {
         emit(AuthError(result.error ?? 'Failed to reset password'));
+      }
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
+  }
+
+  void _onChangePasswordRequested(ChangePasswordRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      final result = await _authRepository.changePassword(
+        currentPassword: event.currentPassword,
+        newPassword: event.newPassword,
+        confirmPassword: event.confirmPassword,
+      );
+      if (result.success) {
+        emit(ChangePasswordSuccess(result.message ?? 'Password changed successfully'));
+      } else {
+        emit(AuthError(result.error ?? 'Failed to change password'));
       }
     } catch (e) {
       emit(AuthError(e.toString()));

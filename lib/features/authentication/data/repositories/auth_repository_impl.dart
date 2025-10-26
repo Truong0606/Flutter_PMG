@@ -409,4 +409,34 @@ class AuthRepositoryImpl implements AuthRepository {
       return AuthResult.failure('Network error: ${e.toString()}');
     }
   }
+
+  // New: Change Password for authenticated user
+  @override
+  Future<AuthResult> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final response = await _apiClient.post('/auth/change-password', body: {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      });
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final data = response.body.isNotEmpty ? jsonDecode(response.body) as Map<String, dynamic> : {};
+        final msg = data['message']?.toString() ?? 'Password changed successfully';
+        return AuthResult(success: true, message: msg, user: null, token: null);
+      }
+
+      String message = 'Failed to change password';
+      if (response.body.isNotEmpty) {
+        try { message = (jsonDecode(response.body) as Map<String, dynamic>)['message']?.toString() ?? message; } catch (_) {}
+      }
+      return AuthResult.failure(message, response.statusCode);
+    } catch (e) {
+      return AuthResult.failure('Network error: ${e.toString()}');
+    }
+  }
 }

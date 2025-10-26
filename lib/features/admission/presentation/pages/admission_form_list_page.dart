@@ -91,15 +91,59 @@ class _LoaderWrapperState extends State<_LoaderWrapper> {
           itemBuilder: (context, i) {
             final it = list[i];
             final status = (it.status.isEmpty ? 'unknown' : it.status).replaceAll('_', ' ');
+            final isDone = it.status.toLowerCase() == 'done';
             return ListTile(
               leading: CircleAvatar(
                 backgroundColor: Colors.blue.shade50,
                 child: const Icon(Icons.assignment_turned_in, color: Colors.blue),
               ),
               title: Text('Form #${it.id} • $status'),
-              subtitle: Text('Term: ${it.admissionTermId} • Classes: ${it.classIds.join(', ')}\nCreated: ${_fmtDate(it.submittedDate ?? it.createdAt)}'),
+              // Hide term id per requirement
+              subtitle: Text('Classes: ${it.classIds.join(', ')}\nCreated: ${_fmtDate(it.submittedDate ?? it.createdAt)}'),
               isThreeLine: true,
               onTap: () => Navigator.pushNamed(context, '/admission/form/detail', arguments: it),
+              trailing: IconButton(
+                tooltip: isDone ? 'Cannot delete a done form' : 'Delete form',
+                icon: Icon(Icons.delete_outline, color: isDone ? Colors.grey : Colors.redAccent),
+                onPressed: isDone
+                    ? null
+                    : () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Delete admission form'),
+                            content: Text('Are you sure you want to delete form #${it.id}? This action cannot be undone.'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed != true) return;
+                        if (!context.mounted) return;
+                        try {
+                          await context.read<AdmissionBloc>().repository.deleteAdmissionForm(it.id);
+                          if (!context.mounted) return;
+                          {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Deleted form #${it.id}')),);
+                            // refresh list
+                            setState(() => _future = _load(context.read<AdmissionBloc>()));
+                          }
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Delete failed: $e'), backgroundColor: Colors.redAccent),
+                            );
+                          }
+                        }
+                      },
+              ),
             );
           },
         );
