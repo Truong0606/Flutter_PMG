@@ -185,7 +185,7 @@ class _StudentCreatePageState extends State<StudentCreatePage> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _placeCtrl,
-                    decoration: const InputDecoration(labelText: 'Place of Birth (optional)', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(labelText: 'Place of Birth', border: OutlineInputBorder()),
                   ),
                   const SizedBox(height: 20),
                   const Text('Images', style: TextStyle(fontWeight: FontWeight.w700)),
